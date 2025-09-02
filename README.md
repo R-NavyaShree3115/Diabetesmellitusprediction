@@ -1,0 +1,2 @@
+# Diabetesmellitusprediction
+A MiniProject
