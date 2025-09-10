@@ -1,0 +1,11 @@
+Condition,Gender,Region,AgeGroup,ExercisePlan
+Normal,Male,South India,Young,Jogging 30 mins|Swimming 20 mins|Cycling 15 mins
+Normal,Female,South India,Young,Yoga 20 mins|Skipping 10 mins|Jogging 15 mins
+Prediabetes,Male,South India,Young,Brisk Walk 30 mins|Push-ups 20|Plank 2 mins
+Prediabetes,Female,South India,Young,Yoga 30 mins|Brisk Walk 20 mins|Dance Workout
+Diabetes,Male,South India,Young,Walking 30 mins|Light Jog 15 mins|Stretching
+Diabetes,Female,South India,Young,Chair Yoga|Breathing Exercise|Slow Walk
+Normal,Male,South India,Middle,Brisk Walking 30 mins|Cycling 10 mins|Yoga 15 mins
+Prediabetes,Female,South India,Middle,Walking 25 mins|Yoga 20 mins|Meditation 10 mins
+Diabetes,Male,South India,Senior,Slow Walking 15 mins|Chair Yoga 10 mins|Breathing Exercise
+Diabetes,Female,South India,Senior,Breathing Exercise|Chair Yoga|Light Stretching
