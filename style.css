@@ -1,0 +1,219 @@
+/* Reset styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Change the entire background to yellow */
+body {
+  background-color: lavenderblush; /* Bright yellow background for the entire page */
+  height: 100vh; /* Full height to fill the screen */
+  margin: 0;
+}
+
+/* Top bar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1976d2; /* CareConnect background color */
+  color: white;
+  padding: 10px 20px;
+  position: relative;
+  height: 70px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.topbar h1 {
+  font-size: 1.8rem;
+  padding-left: 10px;
+  margin: 0;
+}
+
+/* Doctor walking animation from left to right */
+.doctor-walk {
+  position: absolute;
+  top: 10px; /* Adjust to position correctly */
+  left: -60px; /* Start off-screen to the left */
+  animation: walk 30s linear infinite; /* Slowed down the movement to 30 seconds */
+  z-index: 10; /* Ensure it's above other elements */
+}
+
+.doctor-walk img {
+  width: 40px; /* Adjusted size of the doctor */
+  height: auto;
+}
+
+/* Walking animation */
+@keyframes walk {
+  0% {
+    transform: translateX(0); /* Starts from off-screen left */
+  }
+  100% {
+    transform: translateX(100vw); /* Moves across the entire screen to the right */
+  }
+}
+
+/* Secure Access Button (bright yellow for pop effect) */
+.secure-access {
+  background-color: #ffeb3b; /* Bright yellow background */
+  color: #1976d2; /* Dark text for contrast */
+  padding: 12px 24px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  text-align: center;
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  text-align: center;
+  border: 2px solid #ffcc00; /* Yellow border */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.secure-access:hover {
+  background-color: #fdd835; /* Slightly darker yellow on hover */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+  transform: scale(1.08); /* Slightly enlarge on hover */
+}
+
+/* Login container (rounded corners, solid background, reduced width, adjusted position) */
+.login-container {
+  max-width: 500px; /* Reduced width */
+  width: 80%; /* Ensures it fills 80% of the page but doesn't go beyond the set max-width */
+  background: white; /* Solid white background for the form */
+  padding: 30px;
+  border-radius: 30px; /* Rounded corners */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 55%;  /* Adjusted to move the form slightly down */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the form horizontally */
+  z-index: 2;
+  max-height: 80%;
+  overflow-y: auto;
+  text-align: center;
+}
+
+/* Tabs container */
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 8px;
+  width: 100%;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+/* Tabs & Subscribe button styles */
+.tab,
+#subscribeBtn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  cursor: pointer;
+  background: #e0e0e0;
+  transition: 0.3s;
+  font-weight: bold;
+  border-radius: 6px;
+  margin: 0;
+  text-align: center;
+  color: #000;
+  white-space: nowrap;
+}
+
+.tab.active,
+#subscribeBtn.active {
+  background: #1976d2;
+  color: white;
+}
+
+.tab:hover:not(.active),
+#subscribeBtn:hover:not(.active) {
+  background: #a6c8ff;
+  color: #0d47a1;
+}
+
+/* Forms */
+.form {
+  display: none;
+}
+
+.form.active {
+  display: block;
+}
+
+.field {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+label {
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+input:focus,
+select:focus {
+  border-color: #1976d2;
+  outline: none;
+}
+
+/* Signup Button */
+.btn.primary {
+  background: #1976d2;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  width: 80%;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.1s;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.btn.primary:hover {
+  background: #125a9c;
+}
+
+.btn.primary:active {
+  background: #0b3d91;
+  transform: scale(0.98);
+}
+
+/* Center the login button */
+.field button {
+  width: 100%;
+  display: block;
+  margin-top: 20px;
+}

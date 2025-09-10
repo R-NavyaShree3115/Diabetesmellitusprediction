@@ -1,119 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium Diabetes Management</title>
-  <link rel="stylesheet" href="premium.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <header class="header">
-  <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
-  <nav>
-    <ul>
-      <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
-      <li><a href="healthplan.html"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
-      <li><a href="progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
-      <li><a href="alerts.html"><i class="fa-solid fa-bell"></i> Alerts</a></li>
-      <li><a href="doctorconnect.html"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
-      <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
-    </ul>
-  </nav>
-</header>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CareConnect Login</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
 <body>
-  <!-- HEADER -->
-  
+  <!-- Header -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="assests\Ramaiah-logo-scaled.webp" alt="Hospital" class="brand-logo" />
+      <h1>CareConnect</h1>
+    </div>
+    <span class="badge" id="secureBadge" style="display:none;">Secure Access</span>
+  </header>
 
-  <div class="container">
-
-    <!-- STEP 1: PATIENT DATA ENTRY -->
-    <section class="card" id="patient-data">
-      <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
-      <form id="patientForm">
-        <div class="form-group">
-          <label>Age:</label>
-          <input type="number" id="age" min="1" max="120" placeholder="Enter age" required>
-        </div>
-
-        <label>Gender:
-          <select id="gender" required>
-            <option value="">Select</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </label>
-
-        <label>Region:
-          <select id="region" required>
-            <option value="">Select</option>
-            <option value="South India">South India</option>
-            <option value="North India">North India</option>
-            <option value="East India">East India</option>
-            <option value="West India">West India</option>
-            <option value="Central India">Central India</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
-
-        <div class="form-group">
-          <label>Weight (kg):</label>
-          <input type="number" id="weight" min="20" max="200" placeholder="Enter weight" required>
-        </div>
-
-        <div class="form-group">
-          <label>Height (cm):</label>
-          <input type="number" id="height" min="50" max="250" placeholder="Enter height" required>
-        </div>
-
-        <label for="fbs">Fasting Blood Sugar (mg/dL)</label>
-        <input type="number" id="fbs" min="50" max="300" step="1" placeholder="Enter FBS(in range 50-300)">
-
-        <label for="ppbs">Postprandial Blood Sugar (mg/dL)</label>
-        <input type="number" id="ppbs" min="70" max="400" step="1" placeholder="Enter PPBS(in range of 70-400)">
-
-        <label for="hba1c">HbA1c (%)</label>
-        <input type="number" id="hba1c" min="3" max="15" step="0.1" placeholder="Enter HbA1c(in range of 3-25)">
-
-        <div style="margin-top:15px;">
-          <button type="button" onclick="calculateBMI()"><i class="fa-solid fa-calculator"></i> Calculate BMI</button><br>
-          <input type="text" id="bmi" placeholder="Auto-calculated" readonly>
-          <br>
-          <button type="button" onclick="predictDiabetes()"><i class="fa-solid fa-magnifying-glass-chart"></i> Save & Predict</button>
-        </div>
-      </form>
-    </section>
-
-    <!-- STEP 2: PREDICTION RESULT -->
-<section class="card prediction-card" id="prediction-result" style="display:none;">
-  <h2><i class="fa-solid fa-stethoscope"></i> Diabetes Prediction Result</h2>
-  
-  <div class="result-container">
-    <div class="risk-badge" id="risk-badge">Loading...</div>
+  <!-- Main Fullscreen Layout (50/50 split) -->
+  <div class="main-content">
     
-    <div class="progress-wrapper">
-      <label>Risk Level Progress:</label>
-      <div class="progress-bar">
-        <div id="progress" class="progress"></div>
+    <!-- Left: Doctor -->
+    <div class="left-side">
+      <div class="doctor-walk">
+        <img src="assests\doctor walk.gif" alt="Doctor walking" />
       </div>
     </div>
-    
-    <div class="result-details">
-      <p><strong>Status:</strong> <span id="risk-status">--</span></p>
-      <p><strong>Recommendation:</strong> <span id="risk-advice">--</span></p>
+
+    <!-- Right: Signup/Login -->
+    <div class="right-side">
+      <main class="login-container">
+        <div class="tabs">
+          <button class="tab active" data-tab="patient">Patient</button>
+          <button id="subscribeBtn">Subscribe</button>
+          <button class="tab" data-tab="premium">Premium</button>
+          <button class="tab" data-tab="doctor">Doctor</button>
+        </div>
+
+        <div class="forms">
+          <!-- Patient Form -->
+          <form id="form-patient" class="form active" novalidate>
+            <div class="field">
+              <label for="patientEmail">Email</label>
+              <input id="patientEmail" type="email" placeholder="you@example.com" required />
+            </div>
+            <button class="btn primary" type="submit">Login as Patient</button>
+          </form>
+
+          <!-- Subscribe Form -->
+          <form id="form-subscribe" class="form" novalidate>
+            <div style="text-align:center; margin-bottom: 10px;">
+              <img src="assests\scanner.jpg" alt="Payment Scanner" style="width:150px; height:auto;" id="scannerImage" />
+            </div>
+            <div class="field">
+              <label for="subscribeEmail">Patient Email</label>
+              <input id="subscribeEmail" type="email" placeholder="you@example.com" required />
+            </div>
+            <div class="field">
+              <label for="patientName">Patient Name</label>
+              <input id="patientName" type="text" placeholder="Full Name" required />
+            </div>
+            <div class="field">
+              <label for="patientContact">Patient Contact Number</label>
+              <input id="patientContact" type="tel" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required />
+            </div>
+            <div class="field">
+              <label for="subscriptionPlan">Select Plan</label>
+              <select id="subscriptionPlan" required>
+                <option value="" disabled selected>Select plan</option>
+                <option value="1">₹1 Monthly</option>
+                <option value="2999">₹2999 Yearly</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="paymentMode">Payment Mode</label>
+              <select id="paymentMode" required>
+                <option value="" disabled selected>Select payment mode</option>
+                <option value="Paytm">Paytm</option>
+                <option value="Google Pay">Google Pay</option>
+                <option value="PhonePe">PhonePe</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>
+                <input type="checkbox" id="paymentConfirmed" required />
+                I confirm I have completed the payment
+              </label>
+            </div>
+            <button class="btn primary" type="submit">Make Payment & Subscribe</button>
+          </form>
+
+          <!-- Premium Form -->
+          <form id="form-premium" class="form" novalidate>
+            <div style="display:flex; justify-content:center; margin:12px 0;">
+              <img src="assests\premium.png" alt="Premium User" style="width:80px; height:80px; object-fit:contain; border-radius:14px;" />
+            </div>
+            <div class="field">
+              <label for="premiumEmail">Email</label>
+              <input id="premiumEmail" type="email" placeholder="you@example.com" required />
+            </div>
+            <div class="field">
+              <label for="premiumPassword">Password</label>
+              <input id="premiumPassword" type="password" placeholder="••••••••" required minlength="6" />
+              <small class="hint">Premium users need email + password.</small>
+            </div>
+            <button class="btn primary" type="submit">Login as Premium</button>
+          </form>
+
+          <!-- Doctor Form -->
+          <form id="form-doctor" class="form" novalidate>
+            <div class="field">
+              <label for="doctorEmail">Confidential Email</label>
+              <input id="doctorEmail" type="email" placeholder="doctor@hospital.com" required />
+            </div>
+            <div class="field">
+              <label for="doctorPassword">Password</label>
+              <input id="doctorPassword" type="password" placeholder="••••••••" required minlength="6" />
+            </div>
+            <button class="btn primary" type="submit">Login as Doctor</button>
+          </form>
+        </div>
+      </main>
     </div>
   </div>
-</section>
-<div class="progress-bar">
-    <div id="progress" class="progress"></div>
-</div>
 
-
-
-
-  <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="premium.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
