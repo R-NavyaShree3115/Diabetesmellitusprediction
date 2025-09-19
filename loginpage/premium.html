@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Diabetes Management</title>
+  <link rel="stylesheet" href="premium.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <header class="header">
+  <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
+  <nav>
+    <ul>
+      <li><a href="diabetesmellitusprediction/loginpage/loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+      <li><a href="healthplan.html"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
+      <li><a href="progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
+      <li><a href="alerts.html"><i class="fa-solid fa-bell"></i> Alerts</a></li>
+      <li><a href="doctorconnect.html"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
+      <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+    </ul>
+  </nav>
+</header>
+</head>
+<body>
+  <!-- HEADER -->
+  <div class="container">
+    <!-- STEP 1: PATIENT DATA ENTRY -->
+    <section class="card" id="patient-data">
+      <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
+      <form id="patientForm">
+        <div class="form-group">
+          <label>Age:</label>
+          <input type="number" id="age" min="1" max="120" placeholder="Enter age" required>
+        </div>
+
+        <label>Gender:
+          <select id="gender" required>
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </label>
+
+        <label>Region:
+          <select id="region" required>
+            <option value="">Select</option>
+            <option value="South India">South India</option>
+            <option value="North India">North India</option>
+            <option value="East India">East India</option>
+            <option value="West India">West India</option>
+            <option value="Central India">Central India</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+
+        <div class="form-group">
+          <label>Weight (kg):</label>
+          <input type="number" id="weight" min="20" max="200" placeholder="Enter weight" required>
+        </div>
+
+        <div class="form-group">
+          <label>Height (cm):</label>
+          <input type="number" id="height" min="50" max="250" placeholder="Enter height" required>
+        </div>
+
+        <label for="fbs">Fasting Blood Sugar (mg/dL)</label>
+        <input type="number" id="fbs" min="50" max="300" step="1" placeholder="Enter FBS(in range 50-300)">
+
+        <label for="ppbs">Postprandial Blood Sugar (mg/dL)</label>
+        <input type="number" id="ppbs" min="70" max="400" step="1" placeholder="Enter PPBS(in range of 70-400)">
+
+        <label for="hba1c">HbA1c (%)</label>
+        <input type="number" id="hba1c" min="3" max="15" step="0.1" placeholder="Enter HbA1c(in range of 3-25)">
+
+        <div style="margin-top:15px;">
+          <button type="button" onclick="calculateBMI()"><i class="fa-solid fa-calculator"></i> Calculate BMI</button><br>
+          <input type="text" id="bmi" placeholder="Auto-calculated" readonly>
+          <br>
+          <button type="button" onclick="predictDiabetesBackend()">
+  <i class="fa-solid fa-magnifying-glass-chart"></i> Save & Predict
+</button>
+
+        </div>
+      </form>
+    </section>
+
+<!-- STEP 2: PREDICTION RESULT -->
+<section class="card prediction-card" id="prediction-result" style="display:none;">
+  <h2><i class="fa-solid fa-stethoscope"></i> Diabetes Prediction Result</h2>
+  
+  <div class="result-container">
+    <div class="risk-badge" id="risk-badge">Loading...</div>
+    <div class="progress-wrapper">
+      <label>Risk Level Progress:</label>
+      <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+      </div>
+    </div>
+    <div class="result-details">
+      <p><strong>Status:</strong> <span id="risk-status">--</span></p>
+      <p><strong>Recommendation:</strong> <span id="risk-advice">--</span></p>
+    </div>
+  </div>
+</section>
+<div class="progress-bar">
+    <div id="progress" class="progress"></div>
+</div>
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="premium.js">
+    function goHome() {
+    window.location.href = "/diabetesmellitusprediction/loginpage/loginpage.html";
+  }
+  function goHome() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    window.location.href = "loginpage.html";
+}
+  </script>
+</body>
+</html>

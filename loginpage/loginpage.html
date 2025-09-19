@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Animation with Toggle Forms</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body {
+      background: #f6faff;
+      padding-top: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(90deg, #0077b6, #0096c7);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    .header .logo { font-size: 24px; font-weight: bold; animation: fadeIn 1s ease-in; }
+
+    .header nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    .header nav ul li a {
+      text-decoration: none;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .header nav ul li a:hover,
+    .header nav ul li a.active {
+      background: rgba(255,255,255,0.1);
+      color: #f8f8a7;
+    }
+
+    body { margin: 0; padding-top: 70px; }
+
+    /* Container */
+    .container {
+      display: flex;
+      width: 90%;
+      max-width: 1100px;
+      height: 600px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+      animation: fadeInScale 0.6s ease-in-out;
+    }
+
+    .left {
+      width: 40%;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+      animation: slideInLeft 0.8s ease forwards;
+    }
+
+    .doctor img { 
+      width: 80%; 
+      max-width: 250px; 
+      height: auto;
+      animation: floatDoctor 4s ease-in-out infinite alternate; 
+    }
+
+    .right {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: slideInRight 0.8s ease forwards;
+    }
+
+    /* Sections */
+    .sections { display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; }
+    .section {
+      width: 160px;
+      background: #eaf6ff;
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      color: #184d6b;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .section:hover { background: #d6ebfa; transform: scale(1.05); }
+
+    /* Forms */
+    .form-container { display: none; opacity: 0; transition: opacity 0.5s ease; }
+    .form-container.active { display: block; opacity: 1; }
+
+    .form-box { display: none; opacity: 0; transition: opacity 0.4s ease; }
+    .form-box.active { display: block; opacity: 1; }
+
+    .form-box h2 { text-align: center; margin-bottom: 20px; color: #184d6b; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #184d6b; }
+    .form-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+
+    .form-box button {
+      width: 100%;
+      padding: 12px;
+      background: #4fa8e0;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .form-box button:hover { background: #2b89c6; }
+
+    .switch-link { text-align: center; margin-top: 15px; }
+    .switch-link a { color: #4fa8e0; font-weight: bold; cursor: pointer; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideDown { from { transform: translateY(-100%);} to { transform: translateY(0);} }
+    @keyframes fadeInScale { from {opacity:0; transform:scale(0.5);} to {opacity:1; transform:scale(1);} }
+    @keyframes slideInLeft { from { transform:translateX(-100%); opacity:0;} to { transform:translateX(0); opacity:1;} }
+    @keyframes slideInRight { from { transform:translateX(100%); opacity:0;} to { transform:translateX(0); opacity:1;} }
+    @keyframes floatDoctor { 0% {transform:translateY(0);} 100% {transform:translateY(-20px);} }
+
+    /* Responsive */
+    @media (max-width: 900px) { .container { flex-direction: column; height:auto; } .left, .right { width:100%; } }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#" id="themeToggle">🌙 Dark Mode</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Container -->
+  <div class="container">
+    <div class="left">
+      <div class="doctor">
+        <img src="images/doctorwalk.gif" alt="Doctor Animation">
+        <p>Meet our expert doctors</p>
+      </div>
+    </div>
+
+    <div class="right">
+      <!-- Role Selection -->
+      <div class="sections">
+        <div class="section" onclick="showForm('patient')">Patient</div>
+        <div class="section" onclick="showForm('doctor')">Doctor</div>
+      </div>
+
+      <!-- Patient Forms -->
+      <div id="patientForms" class="form-container active">
+        <!-- Login -->
+        <div id="patientLogin" class="form-box active">
+          <h2>Patient Login</h2>
+          <form class="loginForm">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" required>
+            </div>
+            <button type="submit">Login</button>
+          </form>
+          <div class="switch-link">
+            <p>Don't have an account? <a onclick="toggleSubForm('patientSignin','patientLogin')">Sign Up</a></p>
+          </div>
+        </div>
+
+        <!-- Sign Up -->
+        <div id="patientSignin" class="form-box">
+          <h2>Patient Sign Up</h2>
+          <form class="signupForm">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" required>
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <input type="password" name="confirmPassword" required>
+            </div>
+            <p class="errorMsg" style="color:red; display:none;">Passwords do not match!</p>
+            <button type="submit">Sign Up</button>
+          </form>
+          <div class="switch-link">
+            <p>Already have an account? <a onclick="toggleSubForm('patientLogin','patientSignin')">Login</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Forms -->
+      <div id="doctorForms" class="form-container">
+        <!-- Login -->
+        <div id="doctorLogin" class="form-box active">
+          <h2>Doctor Login</h2>
+          <form class="loginForm">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" required>
+            </div>
+            <button type="submit">Login</button>
+          </form>
+          <div class="switch-link">
+            <p>Don't have an account? <a onclick="toggleSubForm('doctorSignin','doctorLogin')">Sign Up</a></p>
+          </div>
+        </div>
+
+        <!-- Sign Up -->
+        <div id="doctorSignin" class="form-box">
+          <h2>Doctor Sign Up</h2>
+          <form class="signupForm">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" required>
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <input type="password" name="confirmPassword" required>
+            </div>
+            <p class="errorMsg" style="color:red; display:none;">Passwords do not match!</p>
+            <button type="submit">Sign Up</button>
+          </form>
+          <div class="switch-link">
+            <p>Already have an account? <a onclick="toggleSubForm('doctorLogin','doctorSignin')">Login</a></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Toggle Dark/Light
+    const toggleBtn = document.getElementById("themeToggle");
+    toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      document.body.classList.toggle("light-mode");
+      toggleBtn.textContent = document.body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
+    });
+    document.body.classList.add("light-mode");
+
+    // Show Patient or Doctor form container
+    function showForm(role) {
+      document.getElementById("patientForms").classList.remove("active");
+      document.getElementById("doctorForms").classList.remove("active");
+      if(role==="patient") document.getElementById("patientForms").classList.add("active");
+      else document.getElementById("doctorForms").classList.add("active");
+    }
+
+    // Switch Login/SignUp forms
+    function toggleSubForm(showId, hideId) {
+      const hide = document.getElementById(hideId);
+      const show = document.getElementById(showId);
+      hide.classList.remove("active");
+      setTimeout(()=>show.classList.add("active"),50);
+    }
+
+    // Signup password validation & Redirect
+    document.querySelectorAll('.signupForm').forEach(form=>{
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const pass = form.querySelector('input[name="password"]').value;
+        const confirm = form.querySelector('input[name="confirmPassword"]').value;
+        const error = form.querySelector('.errorMsg');
+        if(pass!==confirm){
+          error.style.display="block";
+        } else {
+          error.style.display="none";
+          alert("✅ Signup successful! Redirecting to login.");
+          // Redirect after signup
+          const containerId = form.closest('.form-container').id;
+          if(containerId==="patientForms") toggleSubForm('patientLogin','patientSignin');
+          else toggleSubForm('doctorLogin','doctorSignin');
+        }
+      });
+    });
+
+    // Login redirect simulation
+    document.querySelectorAll('.loginForm').forEach(form=>{
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const containerId = form.closest('.form-container').id;
+        if(containerId==="patientForms") {
+          alert("✅ Patient login successful!");
+          window.location.href="diabetesmellitusprediction/loginpage/dashboard.html";
+        } else {
+          alert("✅ Doctor login successful!");
+          window.location.href="diabetesmellitusprediction/loginpage/doctor_dashboard.html";
+        }
+      });
+    });
+
+    // Prevent form submission on Enter key
+    document.querySelectorAll('input').forEach(input=>{
+      input.addEventListener('keydown', function(e){
+        if(e.key==="Enter") e.preventDefault();
+      });
+    });
+
+
+
+  </script>
+</body>
+</html>

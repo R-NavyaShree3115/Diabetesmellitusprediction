@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Diabetes Management - Dashboard</title>
+  <link rel="stylesheet" href="premium.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
+    <nav>
+      <ul>
+        <li><a href="diabetesmellitusprediction/loginpage/loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="dashboard.html" class="active"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="healthplan.html"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
+        <li><a href="progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
+        <li><a href="alerts.html"><i class="fa-solid fa-bell"></i> Alerts</a></li>
+        <li><a href="doctorconnect.html"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
+        <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container dashboard">
+    <h2>Welcome to Your Dashboard</h2>
+
+    <!-- Health Summary -->
+    <section class="card">
+      <h3><i class="fa-solid fa-notes-medical"></i> Health Summary</h3>
+      <p id="risk-status">Loading your health status...</p>
+      <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+      </div>
+      <p id="risk-advice" style="margin-top:10px;"></p>
+    </section>
+   
+    <!-- Quick Links -->
+<section class="card quick-links">
+  <h3><i class="fa-solid fa-bolt"></i> Quick Actions</h3>
+  <div class="buttons">
+    <a href="premium.html" class="btn"><i class="fa-solid fa-chart-line"></i> Prediction</a>
+    <a href="healthplan.html" class="btn"><i class="fa-solid fa-bowl-food"></i> Health Plan</a>
+    <a href="progress.html" class="btn"><i class="fa-solid fa-chart-pie"></i> Progress</a>
+    <a href="doctorconnect.html" class="btn"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a>
+  </div>
+</section>
+
+
+
+    <!-- Recent Activity -->
+    <section class="card">
+      <h3><i class="fa-solid fa-clock"></i> Recent Activity</h3>
+      <p id="last-prediction">No prediction data available.</p>
+    </section>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 CareConnect | Stay Healthy, Stay Safe</p>
+  </footer>
+
+  <script src="premium.js">
+    function goHome() {
+    window.location.href = "/diabetesmellitusprediction/loginpage/loginpage.html"; // replace with your login/home page path
+}
+function goHome() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    window.location.href = "loginpage.html";
+}
+  </script>
+</body>
+</html>
