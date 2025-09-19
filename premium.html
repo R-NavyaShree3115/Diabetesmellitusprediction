@@ -10,6 +10,7 @@
   <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
   <nav>
     <ul>
+      <li><a href="diabetesmellitusprediction/loginpage/loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
       <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
       <li><a href="healthplan.html"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
       <li><a href="progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
@@ -19,14 +20,10 @@
     </ul>
   </nav>
 </header>
-
 </head>
 <body>
   <!-- HEADER -->
-  
-
   <div class="container">
-
     <!-- STEP 1: PATIENT DATA ENTRY -->
     <section class="card" id="patient-data">
       <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
@@ -79,25 +76,26 @@
           <button type="button" onclick="calculateBMI()"><i class="fa-solid fa-calculator"></i> Calculate BMI</button><br>
           <input type="text" id="bmi" placeholder="Auto-calculated" readonly>
           <br>
-          <button type="button" onclick="predictDiabetes()"><i class="fa-solid fa-magnifying-glass-chart"></i> Save & Predict</button>
+          <button type="button" onclick="predictDiabetesBackend()">
+  <i class="fa-solid fa-magnifying-glass-chart"></i> Save & Predict
+</button>
+
         </div>
       </form>
     </section>
 
-    <!-- STEP 2: PREDICTION RESULT -->
+<!-- STEP 2: PREDICTION RESULT -->
 <section class="card prediction-card" id="prediction-result" style="display:none;">
   <h2><i class="fa-solid fa-stethoscope"></i> Diabetes Prediction Result</h2>
   
   <div class="result-container">
     <div class="risk-badge" id="risk-badge">Loading...</div>
-    
     <div class="progress-wrapper">
       <label>Risk Level Progress:</label>
       <div class="progress-bar">
         <div id="progress" class="progress"></div>
       </div>
     </div>
-    
     <div class="result-details">
       <p><strong>Status:</strong> <span id="risk-status">--</span></p>
       <p><strong>Recommendation:</strong> <span id="risk-advice">--</span></p>
@@ -107,13 +105,18 @@
 <div class="progress-bar">
     <div id="progress" class="progress"></div>
 </div>
-
-
-
-
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="premium.js"></script>
+  <script src="premium.js">
+    function goHome() {
+    window.location.href = "/diabetesmellitusprediction/loginpage/loginpage.html";
+  }
+  function goHome() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    window.location.href = "loginpage.html";
+}
+  </script>
 </body>
 </html>
