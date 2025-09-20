@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctor Animation with Toggle Forms</title>
+  <title>Home</title>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -93,7 +93,6 @@
     .doctor img { 
       width: 80%; 
       max-width: 250px; 
-      height: auto;
       animation: floatDoctor 4s ease-in-out infinite alternate; 
     }
 
@@ -340,23 +339,13 @@
         const containerId = form.closest('.form-container').id;
         if(containerId==="patientForms") {
           alert("✅ Patient login successful!");
-          window.location.href="diabetesmellitusprediction/loginpage/dashboard.html";
+          window.location.href="dashboard.html";
         } else {
           alert("✅ Doctor login successful!");
-          window.location.href="diabetesmellitusprediction/loginpage/doctor_dashboard.html";
+          window.location.href="doctor_dashboard.html";
         }
       });
     });
-
-    // Prevent form submission on Enter key
-    document.querySelectorAll('input').forEach(input=>{
-      input.addEventListener('keydown', function(e){
-        if(e.key==="Enter") e.preventDefault();
-      });
-    });
-
-
-
   </script>
 </body>
 </html>
