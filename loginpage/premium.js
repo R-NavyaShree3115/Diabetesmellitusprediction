@@ -16,71 +16,7 @@ function calculateBMI() {
     document.getElementById("bmi").value = bmi;
 }
 
-// ====================
-// Diabetes Prediction
-// ====================
-function predictDiabetes() {
-    const age = parseInt(document.getElementById("age").value);
-    const gender = document.getElementById("gender").value;
-    const region = document.getElementById("region").value;
-    const weight = parseFloat(document.getElementById("weight").value);
-    const height = parseFloat(document.getElementById("height").value);
-    const fbs = parseFloat(document.getElementById("fbs").value);
-    const ppbs = parseFloat(document.getElementById("ppbs").value);
-    const hba1c = parseFloat(document.getElementById("hba1c").value);
 
-    if (!age || !gender || !region || !weight || !height || !fbs || !ppbs || !hba1c) {
-        alert("Please fill in all fields before predicting.");
-        return;
-    }
-
-    const heightInMeters = height / 100;
-    const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
-    document.getElementById("bmi").value = bmi;
-
-    let riskScore = 0;
-
-    // Age factor
-    if (age > 45) riskScore += 1;
-
-    // BMI factor
-    if (bmi > 25) riskScore += 1;
-
-// Show result section
-document.getElementById("prediction-result").style.display = "block";
-
-// Calculate prediction
-let prediction = "Normal";
-
-if (fbs >= 126 || ppbs >= 200 || hba1c >= 6.5) {
-    prediction = "Diabetes";
-} else if (fbs >= 100 || ppbs >= 140 || hba1c >= 5.7) {
-    prediction = "Prediabetes";
-}
-
-// Display prediction
-document.getElementById("risk-status").textContent = prediction;
-
-const progressBar = document.getElementById("progress");
-const riskAdvice = document.getElementById("risk-advice");
-
-// Animate width and color
-progressBar.style.width = "0%"; // reset
-setTimeout(() => {
-    if (prediction === "Normal") {
-        progressBar.style.width = "30%";
-        progressBar.style.backgroundColor = "#28a745"; // Green
-        riskAdvice.textContent = "✅ You are healthy! Maintain a balanced lifestyle.";
-    } else if (prediction === "Prediabetes") {
-        progressBar.style.width = "65%";
-        progressBar.style.backgroundColor = "#ff9800"; // Orange
-        riskAdvice.textContent = "⚠️ Risk detected! Start diet & exercise management.";
-    } else {
-        progressBar.style.width = "100%";
-        progressBar.style.backgroundColor = "#dc3545"; // Red
-        riskAdvice.textContent = "❗ High risk! Consult a doctor immediately.";
-    }
-}, 50);
 
 
     // Save to localStorage for dashboard
@@ -94,7 +30,7 @@ setTimeout(() => {
     history.unshift(predictionEntry);
     if (history.length > 5) history = history.slice(0, 5);
     localStorage.setItem("predictionHistory", JSON.stringify(history));
-}
+
 // ====================
 // Backend Prediction
 // ====================
@@ -121,7 +57,7 @@ async function predictDiabetesBackend() {
     };
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/predict", {
+        const response = await fetch("http://127.0.0.1:8080/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
