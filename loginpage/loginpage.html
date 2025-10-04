@@ -223,7 +223,12 @@
 
   <script>
     // server
-    const serverUrl = "http://127.0.0.1:8080";
+    const serverUrl = "http://127.0.0.1:5000";
+    fetch("http://127.0.0.1:5000/api/endpoint")
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error("Error:", error));
+      
 
     // Switch between Patient and Doctor forms
     function showForm(type) {
@@ -266,6 +271,22 @@
       }
       return false;
     }
+
+const express = require("express");
+const path = require("path");
+const app = express();
+
+// Serve static files
+app.use(express.static(path.join(__dirname, "diabetesmellitusprediction")));
+
+// Default route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "diabetesmellitusprediction", "loginpage", "loginpage.html"));
+});
+
+app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+
+
   </script>
 </body>
 </html>

@@ -10,7 +10,7 @@
   <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
   <nav>
     <ul>
-      <li><a href="/diabetesmellitusprediction/loginpage/loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
       <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
       <li><a href="healthplan.html"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
       <li><a href="progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
@@ -108,10 +108,68 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="premium.js">
-   function goHome() {
-    window.location.href = "/diabetesmellitusprediction/loginpage/loginpage.html";
-  }
-  function goHome() {
+  // ====================
+// BMI Calculation  
+function calculateBMI() {
+    const weight = parseFloat(document.getElementById("weight").value);
+    const height = parseFloat(document.getElementById("height").value) / 100; // Convert cm to m
+    const bmi = (weight / (height * height)).toFixed(2);
+    document.getElementById("bmi").value = bmi;
+} 
+// ====================
+// Backend Prediction
+function predictDiabetes() {
+    const data = {
+        Pregnancies: 2,
+        Glucose: 120,
+        BloodPressure: 70,
+        SkinThickness: 20,
+        Insulin: 79,
+        BMI: 25.6,
+        DiabetesPedigreeFunction: 0.5,
+        Age: 32
+    };
+
+    fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(result => {
+        alert("Prediction: " + result.prediction);
+    })
+    .catch(err => console.error(err));
+}
+async function predictDiabetesBackend() {
+    const age = parseInt(document.getElementById("age").value());
+    const glucose = parseInt(document.getElementById("glucose").value());
+    const bloodPressure = parseInt(document.getElementById("bloodPressure").value());
+    const skinThickness = parseInt(document.getElementById("skinThickness").value()); 
+    const insulin = parseInt(document.getElementById("insulin").value());
+    const bmi = parseFloat(document.getElementById("bmi").value());
+    const diabetesPedigreeFunction = parseFloat(document.getElementById("diabetesPedigreeFunction").value());
+    const data = {
+        Age: age,
+        Glucose: glucose,
+        BloodPressure: bloodPressure,
+        SkinThickness: skinThickness,
+        Insulin: insulin,
+        BMI: bmi,
+        DiabetesPedigreeFunction: diabetesPedigreeFunction
+    };
+    try {
+        const response = await fetch("http://127.0.0.1:5000/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+function goHome() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     window.location.href = "loginpage.html";

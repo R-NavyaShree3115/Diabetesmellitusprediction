@@ -16,7 +16,25 @@ function calculateBMI() {
     document.getElementById("bmi").value = bmi;
 }
 
-
+// ====================
+// Frontend Prediction
+// ====================
+function predictDiabetesFrontend() {
+    const fbs = parseFloat(document.getElementById("fbs").value);
+    const ppbs = parseFloat(document.getElementById("ppbs").value);
+    const bmi = parseFloat(document.getElementById("bmi").value);
+    const age = parseInt(document.getElementById("age").value);
+    const weight = parseFloat(document.getElementById("weight").value);
+    const height = parseFloat(document.getElementById("height").value);
+    const heightInMeters = height / 100;
+    const calculatedBmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
+    document.getElementById("bmi").value = calculatedBmi;
+    if (!fbs || !ppbs || !bmi || !age || !weight || !height) {
+        alert("Please fill in all fields with valid numbers.");
+        return;
+    }
+    //link to training data r app.py for prediction
+  }
 
 
     // Save to localStorage for dashboard
@@ -57,7 +75,7 @@ async function predictDiabetesBackend() {
     };
 
     try {
-        const response = await fetch("http://127.0.0.1:8080/predict", {
+        const response = await fetch("http://127.0.0.1:8000/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
