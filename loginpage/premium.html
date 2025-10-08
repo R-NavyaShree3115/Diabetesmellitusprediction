@@ -22,152 +22,84 @@
 </header>
 </head>
 <body>
-  <!-- HEADER -->
-  <div class="container">
-    <!-- STEP 1: PATIENT DATA ENTRY -->
-    <section class="card" id="patient-data">
-      <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
-      <form id="patientForm">
-        <div class="form-group">
-          <label>Age:</label>
-          <input type="number" id="age" min="1" max="120" placeholder="Enter age" required>
-        </div>
+ <div class="container">
+  <!-- STEP 1: PATIENT DATA ENTRY -->
+  <section class="card" id="patient-data">
+    <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
+    <form id="patientForm" method="POST" action="/predict">
+      
+      <label>Age:</label>
+      <input type="number" name="Age" min="1" max="120" placeholder="Enter age" required>
 
-        <label>Gender:
-          <select id="gender" required>
-            <option value="">Select</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </label>
+      <label>Gender:</label>
+      <select name="Gender" required>
+        <option value="">Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
 
-        <label>Region:
-          <select id="region" required>
-            <option value="">Select</option>
-            <option value="South India">South India</option>
-            <option value="North India">North India</option>
-            <option value="East India">East India</option>
-            <option value="West India">West India</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
+     
+      <label>Weight (kg):</label>
+      <input type="number" id="weight" min="20" max="200" placeholder="Enter weight" required>
 
-        <div class="form-group">
-          <label>Weight (kg):</label>
-          <input type="number" id="weight" min="20" max="200" placeholder="Enter weight" required>
-        </div>
+      <label>Height (cm):</label>
+      <input type="number" id="height" min="50" max="250" placeholder="Enter height" required>
 
-        <div class="form-group">
-          <label>Height (cm):</label>
-          <input type="number" id="height" min="50" max="250" placeholder="Enter height" required>
-        </div>
+      <label>Pregnancies:</label>
+      <input type="number" name="Pregnancies" required min="0">
 
-        <label for="fbs">Fasting Blood Sugar (mg/dL)</label>
-        <input type="number" id="fbs" min="50" max="300" step="1" placeholder="Enter FBS(in range 50-300)">
+      <label>Fasting Blood Sugar (mg/dL):</label>
+      <input type="number" name="Glucose" min="50" max="300" placeholder="Enter Glucose level" required>
 
-        <label for="ppbs">Postprandial Blood Sugar (mg/dL)</label>
-        <input type="number" id="ppbs" min="70" max="400" step="1" placeholder="Enter PPBS(in range of 70-400)">
+      <label>Blood Pressure (mm Hg):</label>
+      <input type="number" name="BloodPressure" min="0" placeholder="Enter Blood Pressure" required>
 
-        <label for="hba1c">HbA1c (%)</label>
-        <input type="number" id="hba1c" min="3" max="15" step="0.1" placeholder="Enter HbA1c(in range of 3-25)">
+      <label>Skin Thickness (mm):</label>
+      <input type="number" name="SkinThickness" min="0" placeholder="Enter Skin Thickness" required>
 
-        <div style="margin-top:15px;">
-          <button type="button" onclick="calculateBMI()"><i class="fa-solid fa-calculator"></i> Calculate BMI</button><br>
-          <input type="text" id="bmi" placeholder="Auto-calculated" readonly>
-          <br>
-          <button type="button" onclick="predictDiabetesBackend()">
-  <i class="fa-solid fa-magnifying-glass-chart"></i> Save & Predict
+      <label>Insulin (mu U/ml):</label>
+      <input type="number" name="Insulin" min="0" placeholder="Enter Insulin level" required>
+
+      
+
+      <label>Diabetes Pedigree Function:</label>
+      <input type="number" step="0.001" name="DiabetesPedigreeFunction" required min="0" max="2">
+
+      <button type="button" onclick="calculateBMI()">📊 Calculate BMI</button>
+      
+      <!--display BMI auto calculated-->
+      <label>BMI:</label>
+      <input type="text" id="bmi" name="BMI" readonly placeholder="BMI will be calculated" required>
+    </form>
+    <button type="button" id="predict-btn" >
+  📊 Save & Predict
 </button>
 
-        </div>
-      </form>
-    </section>
+  </section>
 
-<!-- STEP 2: PREDICTION RESULT -->
-<section class="card prediction-card" id="prediction-result" style="display:none;">
-  <h2><i class="fa-solid fa-stethoscope"></i> Diabetes Prediction Result</h2>
-  
-  <div class="result-container">
-    <div class="risk-badge" id="risk-badge">Loading...</div>
-    <div class="progress-wrapper">
-      <label>Risk Level Progress:</label>
-      <div class="progress-bar">
-        <div id="progress" class="progress"></div>
+  <!-- STEP 2: PREDICTION RESULT -->
+  <section class="card prediction-card" id="prediction-result">
+    <h2><i class="fa-solid fa-stethoscope"></i> Diabetes Prediction Result</h2>
+    <div class="result-container">
+      <div class="risk-badge" id="risk-badge">--</div>
+      <div class="progress-wrapper">
+        <label>Risk Level Progress:</label>
+        <div class="progress-bar">
+          <div id="progress" class="progress"></div>
+        </div>
+      </div>
+      <div class="result-details">
+        <p><strong>Status:</strong> <span id="risk-status">--</span></p>
+        <p><strong>Recommendation:</strong> <span id="risk-advice">--</span></p>
       </div>
     </div>
-    <div class="result-details">
-      <p><strong>Status:</strong> <span id="risk-status">--</span></p>
-      <p><strong>Recommendation:</strong> <span id="risk-advice">--</span></p>
-    </div>
-  </div>
-</section>
-<div class="progress-bar">
-    <div id="progress" class="progress"></div>
+  </section>
 </div>
+
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="premium.js">
-  // ====================
-// BMI Calculation  
-function calculateBMI() {
-    const weight = parseFloat(document.getElementById("weight").value);
-    const height = parseFloat(document.getElementById("height").value) / 100; // Convert cm to m
-    const bmi = (weight / (height * height)).toFixed(2);
-    document.getElementById("bmi").value = bmi;
-} 
-// ====================
-// Backend Prediction
-function predictDiabetes() {
-    const data = {
-        Pregnancies: 2,
-        Glucose: 120,
-        BloodPressure: 70,
-        SkinThickness: 20,
-        Insulin: 79,
-        BMI: 25.6,
-        DiabetesPedigreeFunction: 0.5,
-        Age: 32
-    };
-
-    fetch("http://127.0.0.1:5000/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(result => {
-        alert("Prediction: " + result.prediction);
-    })
-    .catch(err => console.error(err));
-}
-async function predictDiabetesBackend() {
-    const age = parseInt(document.getElementById("age").value());
-    const glucose = parseInt(document.getElementById("glucose").value());
-    const bloodPressure = parseInt(document.getElementById("bloodPressure").value());
-    const skinThickness = parseInt(document.getElementById("skinThickness").value()); 
-    const insulin = parseInt(document.getElementById("insulin").value());
-    const bmi = parseFloat(document.getElementById("bmi").value());
-    const diabetesPedigreeFunction = parseFloat(document.getElementById("diabetesPedigreeFunction").value());
-    const data = {
-        Age: age,
-        Glucose: glucose,
-        BloodPressure: bloodPressure,
-        SkinThickness: skinThickness,
-        Insulin: insulin,
-        BMI: bmi,
-        DiabetesPedigreeFunction: diabetesPedigreeFunction
-    };
-    try {
-        const response = await fetch("http://127.0.0.1:5000/predict", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-    } catch (error) {
-        console.error("Error:", error);
-    }
-}
 
 function goHome() {
     localStorage.removeItem("token");

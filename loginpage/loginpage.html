@@ -105,8 +105,9 @@
     <nav>
       <ul>
         <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="#"><i class="fa-solid fa-circle-info"></i> About</a></li>
+        
         <li><a href="#"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+
       </ul>
     </nav>
   </header>
@@ -264,9 +265,14 @@
     function loginUser(e, role) {
       e.preventDefault();
       alert("✅ " + role + " login successful!");
-      if (role === "patient") {
-        window.location.href = "dashboard.html";
-      } else {
+     if (role === "patient") {
+       // window.location.href= "upload.html";
+       // if(upload==="true"){
+          window.location.href= "dashboard.html";
+      //  }
+      } 
+      else {
+
         window.location.href = "doctor_dashboard.html";
       }
       return false;
