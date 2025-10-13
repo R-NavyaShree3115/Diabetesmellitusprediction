@@ -1,115 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload CSV & Train Models</title>
-  <link rel="stylesheet" href="/diabetesmellitusprediction/loginpage/static/premium.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    .flash.success { color: green; }
-    .flash.danger { color: red; }
-    #loading { display: none; color: blue; font-weight: bold; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareConnect - Home</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='premium.css') }}">
+<style>
+  .flash-success { color: green; }
+  .flash-error { color: red; }
+  #loading { font-weight: bold; color: blue; display: none; }
+  #preview table { border-collapse: collapse; width: 100%; }
+  #preview th, #preview td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+  #preview th { background-color: #f2f2f2; }
+</style>
 </head>
 
-
 <body>
-  <header class="header">
-    <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
-    <nav>
-      <ul>
-       <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
-      </ul>
-    </nav>
-  </header>
-<div class="container dashboard">
-  <section class="card">
-    <h2>Upload Dataset to Train Model</h2>
-    <form id="uploadForm" enctype="multipart/form-data">
-      <input type="file" name="dataset">
-      <button type="submit">Upload & Train</button>
-      <div id="loading">⏳ Processing... Please wait.</div>
-      <div id="messages"></div>
-      <div id="preview-section" style="display:none;">
-        <h3>Data Preview & Model Results:</h3>
-        <div id="preview"></div>
-      </div>
-      <p id="loading">⚡ Training models, please wait...</p>
-    <div id="messages"></div>
-    <div id="preview-section">
-      <h3>Data Preview & Model Results</h3>
-      <div id="preview"></div>
+<header class="header">
+  <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
+  <nav>
+    <ul>
+      <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+    </ul>
+  </nav>
+</header>
+<section class="container" id="container">
+<section class="container dashboard">
+  <h2>📂 Upload CSV to Train Models</h2>
+  <p>Upload your diabetes dataset in CSV format. The system will train multiple machine learning models and display their accuracies.</p>
 
-      <div id="preview-table"></div>
-      <button id="train-btn">Train & Test</button>
-    </div>
-    </form>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="dataset" required>
+    <button type="submit">Upload & Train</button>
+  </form>
 
-    
-    </div>
-
+  <div id="loading">⏳ Processing... Please wait.</div>
+  <div id="messages"></div>
+  <div id="preview"></div>
+  <div id="results"></div>
+  <div id="prediction"></div>
 </section>
-</div>
-
+</section>
 <footer>
-    <p>&copy; 2025 CareConnect | Stay Healthy, Stay Safe</p>
-  </footer>
- 
+  <p>&copy; 2025 CareConnect. All rights reserved | Stay Healthy</p>
+</footer>
+
 <script>
+  function gohome(){
+   
+  }
 const form = document.getElementById('uploadForm');
 const loading = document.getElementById('loading');
 const messages = document.getElementById('messages');
-const previewSection = document.getElementById('preview-section');
-const previewTable = document.getElementById('preview-table');
+const preview = document.getElementById('preview');
+const results = document.getElementById('results');
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    messages.innerHTML = '';
-    previewTable.innerHTML = '';
-    previewSection.style.display = 'none';
-    loading.style.display = 'block';
 
-    const fileInput = form.querySelector('input[name="dataset"]' );
-    if (!fileInput.files.length) {
-        messages.innerHTML = '<div class="flash danger">❌ No file selected</div>';
-        loading.style.display = 'none';
-        return;
-    }
+    // Clear previous outputs
+    messages.innerHTML = '';
+    preview.innerHTML = '';
+    results.innerHTML = '';
+
+    const file = form.querySelector('input[name="dataset"]').files[0];
+    if (!file) return alert("❌ No file selected!");
 
     const formData = new FormData();
-    formData.append('dataset', fileInput.files[0]);
+    formData.append('dataset', file);
+
+    loading.style.display = 'block';
 
     try {
-        // 1️⃣ Upload CSV
-        const response = await fetch('http://127.0.0.1:5000/upload_csv', {
+        // Upload CSV and train models
+        const res = await fetch('http://127.0.0.1:5000/upload_csv', {
             method: 'POST',
             body: formData
         });
 
-        // 2️⃣ Get raw text first (avoid JSON errors)
-        const text = await response.text();
-        console.log("Server response:", text); // debug
+        const data = await res.json();
+        loading.style.display = 'none';
 
-        const data = JSON.parse(text); // parse manually
+        if (data.status === 'success') {
+            messages.innerHTML = '<span class="flash-success">✅ ' + data.message + '</span>';
+            preview.innerHTML = '<h3>CSV Preview (first 10 rows)</h3>' + data.preview;
 
-        if (data.status !== 'success') {
-            throw new Error(data.message);
+            // Show model accuracies
+            let html = '<h3>Model Accuracies:</h3><ul>';
+            for (const [model, acc] of Object.entries(data.accuracies)) {
+                html += `<li>${model}: ${acc}%</li>`;
+            }
+            html += `</ul><strong>🏆 Best Model:</strong> ${data.best_model}`;
+            results.innerHTML = html;
+
+        } else {
+            messages.innerHTML = '<span class="flash-error">❌ ' + data.message + '</span>';
         }
 
-        messages.innerHTML = '<div class="flash success">✅ CSV uploaded successfully!</div>';
-        previewTable.innerHTML = data.preview;
-        previewSection.style.display = 'block';
-
     } catch (err) {
-        messages.innerHTML = `<div class="flash danger">❌ ${err.message}</div>`;
-    } finally {
         loading.style.display = 'none';
+        messages.innerHTML = '<span class="flash-error">❌ Error: ' + err.message + '</span>';
     }
 });
 </script>
-
-
 </body>
 </html>
