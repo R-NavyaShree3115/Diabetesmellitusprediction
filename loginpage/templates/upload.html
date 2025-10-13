@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload CSV & Train Models</title>
+  <link rel="stylesheet" href="/diabetesmellitusprediction/loginpage/static/premium.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .flash.success { color: green; }
+    .flash.danger { color: red; }
+    #loading { display: none; color: blue; font-weight: bold; }
+  </style>
+</head>
+
+
+<body>
+  <header class="header">
+    <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
+    <nav>
+      <ul>
+       <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+<div class="container dashboard">
+  <section class="card">
+    <h2>Upload Dataset to Train Model</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="dataset">
+      <button type="submit">Upload & Train</button>
+      <div id="loading">⏳ Processing... Please wait.</div>
+      <div id="messages"></div>
+      <div id="preview-section" style="display:none;">
+        <h3>Data Preview & Model Results:</h3>
+        <div id="preview"></div>
+      </div>
+      <p id="loading">⚡ Training models, please wait...</p>
+    <div id="messages"></div>
+    <div id="preview-section">
+      <h3>Data Preview & Model Results</h3>
+      <div id="preview"></div>
+
+      <div id="preview-table"></div>
+      <button id="train-btn">Train & Test</button>
+    </div>
+    </form>
+
+    
+    </div>
+
+</section>
+</div>
+
+<footer>
+    <p>&copy; 2025 CareConnect | Stay Healthy, Stay Safe</p>
+  </footer>
+ 
+<script>
+const form = document.getElementById('uploadForm');
+const loading = document.getElementById('loading');
+const messages = document.getElementById('messages');
+const previewSection = document.getElementById('preview-section');
+const previewTable = document.getElementById('preview-table');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messages.innerHTML = '';
+    previewTable.innerHTML = '';
+    previewSection.style.display = 'none';
+    loading.style.display = 'block';
+
+    const fileInput = form.querySelector('input[name="dataset"]' );
+    if (!fileInput.files.length) {
+        messages.innerHTML = '<div class="flash danger">❌ No file selected</div>';
+        loading.style.display = 'none';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('dataset', fileInput.files[0]);
+
+    try {
+        // 1️⃣ Upload CSV
+        const response = await fetch('http://127.0.0.1:5000/upload_csv', {
+            method: 'POST',
+            body: formData
+        });
+
+        // 2️⃣ Get raw text first (avoid JSON errors)
+        const text = await response.text();
+        console.log("Server response:", text); // debug
+
+        const data = JSON.parse(text); // parse manually
+
+        if (data.status !== 'success') {
+            throw new Error(data.message);
+        }
+
+        messages.innerHTML = '<div class="flash success">✅ CSV uploaded successfully!</div>';
+        previewTable.innerHTML = data.preview;
+        previewSection.style.display = 'block';
+
+    } catch (err) {
+        messages.innerHTML = `<div class="flash danger">❌ ${err.message}</div>`;
+    } finally {
+        loading.style.display = 'none';
+    }
+});
+</script>
+
+
+</body>
+</html>

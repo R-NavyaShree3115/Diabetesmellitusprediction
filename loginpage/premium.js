@@ -54,18 +54,16 @@ const response = await fetch("http://127.0.0.1:5000/predict", {
 
     try {
       
-        if (!response.ok) throw new Error("Server response not OK");
-
+        if (!response.ok) throw new Error("Server not responding");
         const result = await response.json();
-        const ensembleResult = result["Ensemble Model"];
-        showResult(ensembleResult);
-        savePredictionHistory(ensembleResult);
+        showResult(result.ensemble_model);
 
     } catch (err) {
         console.error("❌ Error connecting to backend:", err);
         alert("⚠️ Could not connect to Flask backend. Make sure it's running.");
     }
 }
+// link this to app.py
 
 // ====================
 // Display Result
@@ -77,8 +75,7 @@ function showResult(status) {
 
     if (!healthStatus || !healthAdvice || !progressBar) return;
 
-    healthStatus.textContent = status;
-
+    
     if (status === "No Diabetes") {
         progressBar.style.width = "30%";
         progressBar.style.backgroundColor = "green";

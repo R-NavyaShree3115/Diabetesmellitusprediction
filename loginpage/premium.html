@@ -78,23 +78,25 @@
   </section>
 
   <!-- STEP 2: PREDICTION RESULT -->
+
+  
+{% if result %}
   <section class="card prediction-card" id="prediction-result">
     <h2><i class="fa-solid fa-stethoscope"></i> Diabetes Prediction Result</h2>
-    <div class="result-container">
-      <div class="risk-badge" id="risk-badge">--</div>
-      <div class="progress-wrapper">
-        <label>Risk Level Progress:</label>
-        <div class="progress-bar">
-          <div id="progress" class="progress"></div>
-        </div>
-      </div>
-      <div class="result-details">
-        <p><strong>Status:</strong> <span id="risk-status">--</span></p>
-        <p><strong>Recommendation:</strong> <span id="risk-advice">--</span></p>
-      </div>
-    </div>
+    <h3 style="text-align: center; margin-top: 20px;">
+      Prediction Result:
+      {% if result['Prediction'] == 'Diabetes' %}
+        <span style="color: red; font-weight: bold;">⚠️ High Risk of Diabetes</span>
+      {% elif result['Prediction'] == 'Prediabetes' %}
+        <span style="color: orange; font-weight: bold;">⚠️ Possible Prediabetes</span>
+      {% else %}
+        <span style="color: green; font-weight: bold;">✅ Low Risk of Diabetes</span>
+      {% endif %}
+    </h3>
   </section>
-</div>
+{% endif %}
+  
+
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
