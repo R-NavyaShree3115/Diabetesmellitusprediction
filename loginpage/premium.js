@@ -1,69 +1,50 @@
 // ====================
-// BMI Calculation
-// ====================
-function calculateBMI() {
-    const weight = parseFloat(document.getElementById("weight").value);
-    const height = parseFloat(document.getElementById("height").value);
-
-    if (weight > 0 && height > 0) {
-        const heightInMeters = height / 100;
-        const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
-        document.getElementById("bmi").value = bmi;
-    } else {
-        document.getElementById("bmi").value = "";
-    }
-}
-
-// ====================
 // Backend ML Prediction
 // ====================
-async function predictDiabetesBackend() {
-    const age = parseInt(document.getElementById("age").value);
-    const weight = parseFloat(document.getElementById("weight").value);
-    const height = parseFloat(document.getElementById("height").value);
-    const fbs = parseFloat(document.getElementById("fbs").value);
-    const ppbs = parseFloat(document.getElementById("ppbs").value);
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("patientForm");
+    const resultSection = document.getElementById("prediction-result");
+    const resultMessage = document.getElementById("resultMessage");
 
-    if (!age || !weight || !height || !fbs || !ppbs) {
-        alert("⚠️ Please fill all fields.");
-        return;
-    }
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
 
-    // Calculate BMI
-    const heightInMeters = height / 100;
-    const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
-    document.getElementById("bmi").value = bmi;
+        // Collect input values
+        const data = {
+            Age: parseInt(document.getElementById("Age").value),
+            Gender: document.getElementById("Gender").value,
+            Pregnancies: parseInt(document.getElementById("Pregnancies").value),
+            Glucose: parseFloat(document.getElementById("Glucose").value),
+            BloodPressure: parseFloat(document.getElementById("BloodPressure").value),
+            SkinThickness: parseFloat(document.getElementById("SkinThickness").value),
+            Insulin: parseFloat(document.getElementById("Insulin").value),
+            BMI: parseFloat(document.getElementById("BMI").value),
+            DiabetesPedigreeFunction: parseFloat(document.getElementById("DiabetesPedigreeFunction").value)
+        };
 
-    const data = {
-  Pregnancies: parseInt(document.getElementById("Pregnancies").value),
-  Glucose: Glucose,
-  BloodPressure: parseFloat(document.getElementById("BloodPressure").value),
-  SkinThickness: parseFloat(document.getElementById("SkinThickness").value),
-  Insulin: Insulin,
-  BMI: parseFloat(document.getElementById("bmi").value),
-  DiabetesPedigreeFunction: parseFloat(document.getElementById("DiabetesPedigreeFunction").value),
-  Age: parseInt(document.getElementById("Age").value)
-};
+        try {
+            const res = await fetch("/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
 
+            const result = await res.json();
 
-const response = await fetch("http://127.0.0.1:5000/predict", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(data)
+            if(result.status === "success") {
+                resultSection.style.display = "block";
+                resultMessage.innerHTML = `<h3>Prediction: ${result.ensemble_model}</h3>`;
+            } else {
+                alert("⚠️ Prediction failed: " + result.message);
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("⚠️ Could not connect to Flask backend. Make sure it's running.");
+        }
+    });
 });
 
-    try {
-      
-        if (!response.ok) throw new Error("Server not responding");
-        const result = await response.json();
-        showResult(result.ensemble_model);
-
-    } catch (err) {
-        console.error("❌ Error connecting to backend:", err);
-        alert("⚠️ Could not connect to Flask backend. Make sure it's running.");
-    }
-}
-// link this to app.py
 
 // ====================
 // Display Result
@@ -75,15 +56,12 @@ function showResult(status) {
 
     if (!healthStatus || !healthAdvice || !progressBar) return;
 
-    
-    if (status === "No Diabetes") {
+    healthStatus.textContent = status;
+
+    if (status === "Non-Diabetic") {
         progressBar.style.width = "30%";
         progressBar.style.backgroundColor = "green";
         healthAdvice.textContent = "You are healthy! Maintain a good lifestyle.";
-    } else if (status === "Prediabetes") {
-        progressBar.style.width = "65%";
-        progressBar.style.backgroundColor = "orange";
-        healthAdvice.textContent = "Risk detected! Start managing diet and exercise.";
     } else {
         progressBar.style.width = "100%";
         progressBar.style.backgroundColor = "red";
@@ -94,11 +72,10 @@ function showResult(status) {
     localStorage.setItem("latestPrediction", status);
 }
 
-// ---------------------------
+// ====================
 // Attach to button click
-// ---------------------------
+// ====================
 document.getElementById("predict-btn").addEventListener("click", predictDiabetesBackend);
-
 
 // ====================
 // Save Prediction History

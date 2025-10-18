@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CareConnect-Home</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <link rel="stylesheet" href="{{ url_for('static', filename='loginpage.css') }}">
+  <link rel="icon" type="image/x-icon" href="/diabetesmellitusprediction/loginpage/images/doctorwalk.gif">
+  <link rel="upload" href="{{ url_for('uploadpage') }}">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
     body { background: #f6faff; padding-top: 80px; min-height: 100vh; }
@@ -95,6 +97,10 @@
     .form-box button:hover { background: #0077b6; }
     .switch-link { text-align: center; margin-top: 15px; }
     .switch-link a { color: #0096c7; font-weight: bold; cursor: pointer; }
+
+    footer {
+      text-align: center; padding: 20px 0; background: #0077b6; color: white; margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -104,19 +110,19 @@
     <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
     <nav>
       <ul>
-        <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
-        
-        <li><a href="#"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+        <li><a href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
+
+        <li><a href="http://127.0.0.1:5000/contact"><i class="fa-solid fa-envelope"></i> Contact</a></li>
 
       </ul>
     </nav>
-  </header>
+  </header><br><br>
 
   <!-- Container -->
   <div class="container">
     <!-- Left -->
     <div class="left">
-      <img src="images/doctorwalk.gif" alt="Doctor Animation">
+      <img src="/images/doctorwalk.gif" alt="Doctor Animation">
       <p>Meet our expert doctors</p>
     </div>
 
@@ -142,7 +148,8 @@
               <label>Password</label>
               <input type="password" required>
             </div>
-            <button type="submit">Login</button>
+            <button type="button" >Login</button>
+
           </form>
           <div class="switch-link">
             <p>Don't have an account? <a onclick="toggleSubForm('patientSignin','patientLogin')">Sign Up</a></p>
@@ -188,7 +195,10 @@
               <label>Password</label>
               <input type="password" required>
             </div>
-            <button type="submit">Login</button>
+
+           
+               <button type="submit">Login</button>
+             
           </form>
           <div class="switch-link">
             <p>Don't have an account? <a onclick="toggleSubForm('doctorSignin','doctorLogin')">Sign Up</a></p>
@@ -222,77 +232,74 @@
     </div>
   </div>
 
-  <script>
-    // server
-    const serverUrl = "http://127.0.0.1:5000";
-    fetch("http://127.0.0.1:5000/api/endpoint")
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => console.error("Error:", error));
-      
+  <footer>
+    <p>&copy; 2025 CareConnect. All rights reserved | Stay Healthy</p>
+  </footer>
 
-    // Switch between Patient and Doctor forms
-    function showForm(type) {
-      document.getElementById("patientForms").classList.remove("active");
-      document.getElementById("doctorForms").classList.remove("active");
-      document.getElementById(type + "Forms").classList.add("active");
-    }
+<script>
+  // client: server base URL (adjust if needed)
+  const serverUrl = "http://127.0.0.1:5000";
+  fetch(serverUrl + "/api/endpoint")
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error("Error:", error));
 
-    // Switch between Login and Signup
-    function toggleSubForm(showId, hideId) {
-      document.getElementById(showId).classList.add("active");
-      document.getElementById(hideId).classList.remove("active");
-    }
+  // Switch between Patient and Doctor forms
+  function showForm(type) {
+    document.getElementById("patientForms").classList.remove("active");
+    document.getElementById("doctorForms").classList.remove("active");
+    document.getElementById(type + "Forms").classList.add("active");
+  }
 
-    // Signup validation
-    function signupUser(e, role) {
-      e.preventDefault();
-      const password = document.getElementById(role + "Password").value;
-      const confirm = document.getElementById(role + "Confirm").value;
-      const error = document.getElementById(role + "Error");
+  // Switch between Login and Signup
+  function toggleSubForm(showId, hideId) {
+    document.getElementById(showId).classList.add("active");
+    document.getElementById(hideId).classList.remove("active");
+  }
 
-      if (password !== confirm) {
-        error.style.display = "block";
-        return false;
-      }
-      error.style.display = "none";
-      alert("✅ " + role + " signup successful! Please login.");
-      toggleSubForm(role + "Login", role + "Signin");
+  // Signup validation
+  function signupUser(e, role) {
+    e.preventDefault();
+    const password = document.getElementById(role + "Password").value;
+    const confirm = document.getElementById(role + "Confirm").value;
+    const error = document.getElementById(role + "Error");
+
+    if (password !== confirm) {
+      error.style.display = "block";
       return false;
     }
+    error.style.display = "none";
+    alert("✅ " + role + " signup successful! Please login.");
+    toggleSubForm(role + "Login", role + "Signin");
+    return false;
+  }
 
-// Login redirect
-    function loginUser(e, role) {
-      e.preventDefault();
-      alert("✅ " + role + " login successful!");
-     if (role === "patient") {
-        window.location.href= "upload.html";
-        if(upload==="true"){
-          window.location.href= "dashboard.html";
-        }
-      } 
-      else {
-
-        window.location.href = "doctor_dashboard.html";
-      }
-      return false;
+  document.querySelector('button[type="button"]').addEventListener('click', function() {
+    window.location.href = "{{ url_for('uploadpage') }}";
+  });
+  // Login redirect
+  function loginUser(e, role) {
+    e.preventDefault();
+    
+    if (role === "patient") {
+      // go to upload page for patients & show successful login alert
+      alert("✅ " + role + " login successful! Redirecting to upload page.");
+      window.location.href = "{{ url_for('uploadpage') }}";
+    } else {
+      // doctor dashboard
+      alert("✅ " + role + " login successful! Redirecting to dashboard.");
+      window.location.href = "{{ url_for('dashboard') }}";
     }
+    return false;
+  }
 
-const express = require("express");
-const path = require("path");
-const app = express();
+  function logout() {
+    window.location.href = "http://127.0.0.1:5000/logout";
+  }
 
-// Serve static files
-app.use(express.static(path.join(__dirname, "diabetesmellitusprediction")));
-
-// Default route
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "diabetesmellitusprediction", "loginpage", "loginpage.html"));
-});
-
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
-
-
-  </script>
+  function go_Home() {
+    window.location.href = "http://127.0.0.1:5000";
+  }
+</script>
 </body>
 </html>

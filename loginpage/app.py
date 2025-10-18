@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for
 import pandas as pd
 import os
 import joblib
@@ -11,18 +11,69 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 
 app = Flask(__name__)
+app.config['HOME'] = os.path.dirname(os.path.abspath(__file__))
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 MODEL_FOLDER = 'models'
 os.makedirs(MODEL_FOLDER, exist_ok=True)
 
-# -------------------------
-# Route: Home Page
-# -------------------------
 @app.route('/')
 def home():
+    """Default route → Login page"""
+    return render_template('/loginpage.html')
+
+@app.route('/images/<path:filename>')
+def serve_images(filename):
+    return send_from_directory('images', filename)
+
+@app.route('/upload')
+def uploadpage():
     return render_template('upload.html')
+
+@app.route('/premium')
+def premium():
+    """After training → Prediction page"""
+    return render_template('/premium.html')
+
+@app.route('/dashboard')
+def dashboard():
+    """Optional dashboard route"""
+    return render_template('/dashboard.html')
+
+@app.route('/logout')
+def logout():
+    """Logout user"""
+    return render_template('/logout.html')
+
+@app.route('/healthplan')
+def healthplan():
+    """Health Plan page"""
+    return render_template('/healthplan.html')
+@app.route('/progress')
+def progress():
+    """Progress page"""
+    return render_template('/progress.html')
+@app.route('/alerts')
+def alerts():
+    """Alerts page"""
+    return render_template('/alerts.html')
+@app.route('/doctorconnect')
+def doctorconnect():
+    """Doctor Connect page"""
+    return render_template('/doctorconnect.html')
+
+# Example: Login button redirect
+@app.route('/login', methods=['POST'])
+def login():
+    # (You can add login validation later)
+    return redirect(url_for('uploadpage'))  # ✅ correct redirect
+
+@app.route('/api/endpoint')
+def api_endpoint():
+    return jsonify({'message': 'API endpoint is working!'})
+
+
 
 # -------------------------
 # Route: Upload CSV and Train
@@ -121,6 +172,67 @@ def upload_csv():
         'best_model': best_model,
         'message':'Models trained successfully!'
     })
+
+# -------------------------
+# Route: Classify New Data
+# -------------------------
+
+def classify_diabetes(Outcome):
+    """Map numeric outcome to label"""
+    return 'Diabetic' if Outcome == 1 else 'Non-Diabetic'
+
+    # Train any classifier
+def train_classifier(model, X_train, y_train):
+    """Train a given sklearn classifier and return the trained model"""
+    model.fit(X_train, y_train)
+    return model
+
+# -------------------------
+# Route: Predict from Frontend Data
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        data = request.get_json()
+
+        # ✅ Convert Gender to numeric if not in training
+        gender_value = 1 if data.get("Gender") == "Male" else 0
+
+        # Build feature list in same order as model was trained
+        features = [[
+            data.get("Pregnancies"),
+            data.get("Glucose"),
+            data.get("BloodPressure"),
+            data.get("SkinThickness"),
+            data.get("Insulin"),
+            data.get("BMI"),
+            data.get("DiabetesPedigreeFunction"),
+            data.get("Age"),
+            gender_value    # Include only if your model had it during training
+        ]]
+
+        # 🧠 Load your model
+        model = joblib.load("diabetes_model.pkl")
+
+        # ✅ Get prediction
+        prediction = model.predict(features)[0]
+        result = "Diabetic" if prediction == 1 else "Non-Diabetic"
+
+        message = (
+            "⚠️ High risk of diabetes detected. Consult a doctor soon."
+            if prediction == 1
+            else "✅ You are likely not diabetic. Maintain a healthy lifestyle!"
+        )
+
+        return jsonify({
+            "status": "success",
+            "ensemble_model": result,
+            "message": message
+        })
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"status": "error", "message": str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True)

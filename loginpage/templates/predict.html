@@ -3,15 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>Predict Diabetes</title>
-< meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='premium.css') }}">
 </head>
 <body>
-    <header class="header"> <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div> <nav> <ul> <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li> <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li> </ul> </nav> </header>
-     
+    <header class="header"> 
+        <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div> 
+        <nav> <ul> 
+            <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li> 
+            <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li> 
+            </ul> </nav> 
+    </header>
     <section class="container dashboard" id="container">
-<h2>🔮 Predict Using Trained Model</h2>
+<h2>Predict Using Trained Model</h2>
 <form id="predictForm">
   <label>Pregnancies: <input type="number" name="Pregnancies"></label><br>
   <label>Glucose: <input type="number" name="Glucose"></label><br>

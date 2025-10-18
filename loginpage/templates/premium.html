@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Diabetes Management</title>
+  <link rel="stylesheet" href="static/premium.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <header class="header">
+  <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
+  <nav>
+    <ul>
+      <li><a href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="http://127.0.0.1:5000/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+      <li><a href="http://127.0.0.1:5000/healthplan"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
+      <li><a href="http://127.0.0.1:5000/progress"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
+      <li><a href="http://127.0.0.1:5000/alerts"><i class="fa-solid fa-bell"></i> Alerts</a></li>
+      <li><a href="http://127.0.0.1:5000/doctorconnect"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
+      <li><a href="http://127.0.0.1:5000/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+    </ul>
+  </nav>
+</header>
+</head>
+<body>
+ <div class="container">
+  <!-- STEP 1: PATIENT DATA ENTRY -->
+  <section class="card" id="patient-data">
+    <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
+    <form id="patientForm" method="POST" action="/predict">
+      
+      <label>Age:</label>
+      <input type="number" name="Age" min="1" max="120" placeholder="Enter age(1-120)" required>
+
+      <label>Gender:</label>
+      <select name="Gender" required>
+        <option value="">Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+
+      <label>Pregnancies:</label>
+      <input type="number" name="Pregnancies" required min="0">
+
+      <label>Fasting Blood Sugar (mg/dL):</label>
+      <input type="number" name="Glucose" min="50" max="300" placeholder="Enter Glucose level(50-300 mg/dL)" required>
+
+      <label>Blood Pressure (mm Hg):</label>
+      <input type="number" name="BloodPressure" min="0" placeholder="Enter Blood Pressure(0-300 mm Hg)"  required>
+
+      <label>Skin Thickness (mm):</label>
+      <input type="number" name="SkinThickness" min="0" placeholder="Enter Skin Thickness(0-99 mm)" required>
+
+      <label>Insulin (mu U/ml):</label>
+      <input type="number" name="Insulin" min="0" placeholder="Enter Insulin level(0-1000 mu U/ml)" required>
+
+      <label>Diabetes Pedigree Function:</label>
+      <input type="number" step="0.001" name="DiabetesPedigreeFunction(0-2)" required min="0" max="2">
+   
+      <label>BMI (Body Mass Index):</label>
+      <input type="number" step="0.1" name="BMI" min="10" max="70" placeholder="Enter BMI(10-70)" required>
+   <button type="submit" id="predict-btn">📊 Save & Predict</button>
+
+  </section>
+
+  <!-- STEP 2: PREDICTION RESULT -->
+  <section class="card" id="resultSection" style="display:none;">
+    <h2><i class="fa-solid fa-chart-bar"></i> Prediction Result</h2>
+    <div id="resultMessage"></div>
+    <button onclick="location.reload();">🔄 New Prediction</button>
+  </section>
+ </div>
+ <footer class="footer">
+  <p>&copy; 2025 CareConnect. All rights reserved. Stay Healthy!</p>
+</footer>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/diabetesmellitusprediction/loginpage/premium.js"></script>
+ <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("patientForm");
+  const resultSection = document.getElementById("resultSection");
+  const resultMessage = document.getElementById("resultMessage");
+  const predictBtn = document.getElementById("predict-btn");
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault(); // stop page reload
+
+    // Disable button during prediction
+    predictBtn.disabled = true;
+    predictBtn.innerText = "⏳ Predicting...";
+
+    // Collect input values safely
+    const formData = new FormData(form);
+    const data = {
+      Age: parseFloat(formData.get("Age")),
+      Gender: formData.get("Gender"),
+      Pregnancies: parseFloat(formData.get("Pregnancies")),
+      Glucose: parseFloat(formData.get("Glucose")),
+      BloodPressure: parseFloat(formData.get("BloodPressure")),
+      SkinThickness: parseFloat(formData.get("SkinThickness")),
+      Insulin: parseFloat(formData.get("Insulin")),
+      BMI: parseFloat(formData.get("BMI")),
+      DiabetesPedigreeFunction: parseFloat(formData.get("DiabetesPedigreeFunction(0-2)"))
+    };
+
+    try {
+      // Send data to Flask backend
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      // Display result dynamically
+      resultSection.style.display = "block";
+      if (result.status === "success") {
+        resultMessage.innerHTML = `
+          <h3>Prediction Result: 
+            <span style="color:${result.ensemble_model === "Diabetic" ? "red" : "green"};">
+              ${result.ensemble_model}
+            </span>
+          </h3>
+          <p>${result.message}</p>
+        `;
+      } else {
+        resultMessage.innerHTML = `<p style="color:red;">${result.message}</p>`;
+      }
+    } catch (err) {
+      resultSection.style.display = "block";
+      resultMessage.innerHTML = `<p style="color:red;">⚠️ Error: Could not connect to Flask backend.</p>`;
+    }
+
+    // Re-enable button
+    predictBtn.disabled = false;
+    predictBtn.innerText = "📊 Save & Predict";
+  });
+});
+</script>
+  <script>
+
+function goHome() {
+  window.location.href = "http://127.0.0.1:5000";
+}
+function logout() {
+  window.location.href = "http://127.0.0.1:5000/logout";
+}
+function godashboard() {
+  window.location.href = "http://127.0.0.1:5000/dashboard";
+}
+
+function gohealthplan() {
+  window.location.href = "http://127.0.0.1:5000/healthplan";
+}
+function goprogress() {
+  window.location.href = "http://127.0.0.1:5000/progress";
+}
+function godoctorconnect() {
+  window.location.href = "http://127.0.0.1:5000/doctorconnect";
+}
+function goalerts() {
+  window.location.href = "http://127.0.0.1:5000/alerts";
+}
+
+  </script>
+</body>
+</html>

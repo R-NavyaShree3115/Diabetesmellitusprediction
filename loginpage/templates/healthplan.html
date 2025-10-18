@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Premium Diabetes Management - Health Plan</title>
-  <link rel="stylesheet" href="premium.css">
+  <link rel="stylesheet" href="static/premium.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -13,13 +13,13 @@
     <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
     <nav>
       <ul>
-        <li><a href="diabetesmellitusprediction/loginpage/loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
-        <li><a href="healthplan.html" class="active"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
-        <li><a href="progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
-        <li><a href="alerts.html"><i class="fa-solid fa-bell"></i> Alerts</a></li>
-        <li><a href="doctorconnect.html"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
-        <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        <li><a href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="http://127.0.0.1:5000/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="http://127.0.0.1:5000/healthplan" class="active"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
+        <li><a href="http://127.0.0.1:5000/progress"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
+        <li><a href="http://127.0.0.1:5000/alerts"><i class="fa-solid fa-bell"></i> Alerts</a></li>
+        <li><a href="http://127.0.0.1:5000/doctorconnect"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
+        <li><a href="http://127.0.0.1:5000/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
       </ul>
     </nav>
   </header>
@@ -57,14 +57,26 @@
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   
-  <script src="premium.js">
-    function goHome() {
-    window.location.href = "/diabetesmellitusprediction/loginpage/loginpage.html"; // replace with your login/home page path
+  <script src="diabetesmellitusprediction/loginpage/premium.js"></script>
+  <script>
+   function goHome() {
+  window.location.href = "http://127.0.0.1:5000";
 }
-function goHome() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    window.location.href = "loginpage.html";
+function logout() {
+  window.location.href = "http://127.0.0.1:5000/logout";
+}
+function godashboard() {
+  window.location.href = "http://127.0.0.1:5000/dashboard";
+}
+
+function gohealthplan() {
+  window.location.href = "http://127.0.0.1:5000/healthplan";
+}
+function goprogress() {
+  window.location.href = "http://127.0.0.1:5000/progress";
+}
+function godoctorconnect() {
+  window.location.href = "http://127.0.0.1:5000/doctorconnect";
 }
   </script>
 

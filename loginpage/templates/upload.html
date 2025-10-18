@@ -3,16 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CareConnect - Home</title>
+<title >CareConnect - Home</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='premium.css') }}">
+
 <style>
+
   .flash-success { color: green; }
   .flash-error { color: red; }
   #loading { font-weight: bold; color: blue; display: none; }
-  #preview table { border-collapse: collapse; width: 100%; }
-  #preview th, #preview td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+  #preview table { border-collapse: collapse; width: 40%; }
+  #preview th, #preview td { border: 1px solid #ddd; padding: 2px; text-align: center; }
   #preview th { background-color: #f2f2f2; }
+  #results { margin-top: 20px; }
+  #predict-btn{
+    margin-left: 40%;
+    background-color: none;
+    color: white;
+    
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100px ;
+  }
+  #card{
+    width: 70%;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fff;
+    height: fit-content;
+  }
+ 
 </style>
 </head>
 
@@ -21,16 +44,16 @@
   <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
   <nav>
     <ul>
-      <li><a href="loginpage.html"><i class="fa-solid fa-house"></i> Home</a></li>
-      <li><a href="logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+      <li><a  href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="http://127.0.0.1:5000/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+
     </ul>
   </nav>
-</header>
-<section class="container" id="container">
-<section class="container dashboard">
-  <h2>📂 Upload CSV to Train Models</h2>
-  <p>Upload your diabetes dataset in CSV format. The system will train multiple machine learning models and display their accuracies.</p>
+</header><br><br>
+<div class="card" id="card">
 
+<section class="card-content">
+  <h2>📂 Upload CSV to Train Models</h2>
   <form id="uploadForm" enctype="multipart/form-data">
     <input type="file" name="dataset" required>
     <button type="submit">Upload & Train</button>
@@ -40,22 +63,27 @@
   <div id="messages"></div>
   <div id="preview"></div>
   <div id="results"></div>
-  <div id="prediction"></div>
+    </div>
+    <button id="predict-btn" style="display:none;">Predict</button><br><br>
 </section>
-</section>
+
+</div>
+
+<br>
+<br><br>
 <footer>
   <p>&copy; 2025 CareConnect. All rights reserved | Stay Healthy</p>
 </footer>
 
 <script>
-  function gohome(){
-   
-  }
+  //server endpoint
+  const serverUrl = "http://127.0.0.1:5000/upload";
 const form = document.getElementById('uploadForm');
 const loading = document.getElementById('loading');
 const messages = document.getElementById('messages');
 const preview = document.getElementById('preview');
 const results = document.getElementById('results');
+
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -85,7 +113,7 @@ form.addEventListener('submit', async (e) => {
 
         if (data.status === 'success') {
             messages.innerHTML = '<span class="flash-success">✅ ' + data.message + '</span>';
-            preview.innerHTML = '<h3>CSV Preview (first 10 rows)</h3>' + data.preview;
+            preview.innerHTML = '<h3>Preview</h3>' + data.preview;
 
             // Show model accuracies
             let html = '<h3>Model Accuracies:</h3><ul>';
@@ -94,6 +122,12 @@ form.addEventListener('submit', async (e) => {
             }
             html += `</ul><strong>🏆 Best Model:</strong> ${data.best_model}`;
             results.innerHTML = html;
+            
+
+              // ✅ Show Predict button
+            document.getElementById('predict-btn').style.display = 'inline-block';
+
+
 
         } else {
             messages.innerHTML = '<span class="flash-error">❌ ' + data.message + '</span>';
@@ -104,6 +138,16 @@ form.addEventListener('submit', async (e) => {
         messages.innerHTML = '<span class="flash-error">❌ Error: ' + err.message + '</span>';
     }
 });
+  document.getElementById('predict-btn').onclick = function() {
+  window.location.href = "/premium";
+}
+// Home and Logout functions when clicked on buttons in navbar
+function goHome() {
+  window.location.href = "http://127.0.0.1:5000";
+}
+function logout() {
+  window.location.href = "http://127.0.0.1:5000/logout";
+}
 </script>
 </body>
 </html>
