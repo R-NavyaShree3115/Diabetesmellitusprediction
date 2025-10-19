@@ -43,7 +43,8 @@
 </div>
 <!-- Scripts -->
 
-  <script src="diabetesmellitusprediction/loginpage/premium.js">
+    <script src="{{url_for('static', filename='premium.js')}}"></script>
+    <script>
   function goHome() {
   window.location.href = "http://127.0.0.1:5000";
 }

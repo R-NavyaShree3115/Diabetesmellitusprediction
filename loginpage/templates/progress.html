@@ -44,7 +44,8 @@
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="premium.js">
+    <script src="{{url_for('static', filename='premium.js')}}"></script>
+    <script>
   function goHome() {
   window.location.href = "http://127.0.0.1:5000";
 }

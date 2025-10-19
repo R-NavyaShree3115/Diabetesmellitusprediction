@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for
 import pandas as pd
+import numpy as np
 import os
 import joblib
 from sklearn.model_selection import train_test_split
@@ -10,6 +11,7 @@ from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 
+
 app = Flask(__name__)
 app.config['HOME'] = os.path.dirname(os.path.abspath(__file__))
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -17,6 +19,11 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 MODEL_FOLDER = 'models'
 os.makedirs(MODEL_FOLDER, exist_ok=True)
+
+# Globals to hold loaded model and scaler for prediction requests
+model = None
+scaler = None
+
 
 @app.route('/')
 def home():
@@ -164,6 +171,8 @@ def upload_csv():
     }
 
     best_model = max(accuracies, key=accuracies.get)
+    joblib.dump(ensemble_model, os.path.join(MODEL_FOLDER, 'diabetes_model.pkl'))
+    joblib.dump(scaler, os.path.join(MODEL_FOLDER, 'scaler.pkl'))
 
     return jsonify({
         'status':'success',
@@ -173,66 +182,38 @@ def upload_csv():
         'message':'Models trained successfully!'
     })
 
-# -------------------------
-# Route: Classify New Data
-# -------------------------
+model = joblib.load(os.path.join(MODEL_FOLDER, 'diabetes_model.pkl'))
 
-def classify_diabetes(Outcome):
-    """Map numeric outcome to label"""
-    return 'Diabetic' if Outcome == 1 else 'Non-Diabetic'
-
-    # Train any classifier
-def train_classifier(model, X_train, y_train):
-    """Train a given sklearn classifier and return the trained model"""
-    model.fit(X_train, y_train)
-    return model
-
-# -------------------------
-# Route: Predict from Frontend Data
-
-@app.route("/predict", methods=["POST"])
+@app.route('/predict', methods=['POST'])
 def predict():
     try:
         data = request.get_json()
-
-        # ✅ Convert Gender to numeric if not in training
-        gender_value = 1 if data.get("Gender") == "Male" else 0
-
-        # Build feature list in same order as model was trained
-        features = [[
-            data.get("Pregnancies"),
-            data.get("Glucose"),
-            data.get("BloodPressure"),
-            data.get("SkinThickness"),
-            data.get("Insulin"),
-            data.get("BMI"),
-            data.get("DiabetesPedigreeFunction"),
-            data.get("Age"),
-            gender_value    # Include only if your model had it during training
-        ]]
-
-        # 🧠 Load your model
-        model = joblib.load("diabetes_model.pkl")
-
-        # ✅ Get prediction
+        features = [
+            data['Pregnancies'], data['Glucose'], data['BloodPressure'],
+            data['SkinThickness'], data['Insulin'], data['BMI'],
+            data['DiabetesPedigreeFunction'], data['Age']
+        ]
+        features = np.array(features).reshape(1, -1)
         prediction = model.predict(features)[0]
-        result = "Diabetic" if prediction == 1 else "Non-Diabetic"
 
-        message = (
-            "⚠️ High risk of diabetes detected. Consult a doctor soon."
-            if prediction == 1
-            else "✅ You are likely not diabetic. Maintain a healthy lifestyle!"
-        )
+        if prediction == 1:
+            advice = "High risk of diabetes detected. Consult your doctor soon."
+        else:
+            advice = "Low risk of diabetes. Keep maintaining a healthy lifestyle."
 
         return jsonify({
-            "status": "success",
-            "ensemble_model": result,
-            "message": message
+            "prediction": int(prediction),
+            "advice": advice
         })
-
     except Exception as e:
-        print("Error:", e)
-        return jsonify({"status": "error", "message": str(e)})
+        return jsonify({"error": str(e)})
 
+
+@app.route('/predict', methods=['GET'])
+def block_predict():
+    # Prevents direct GET access to /predict
+    return redirect(url_for('premium'))
+
+# -------------------------
 if __name__ == '__main__':
     app.run(debug=True)
