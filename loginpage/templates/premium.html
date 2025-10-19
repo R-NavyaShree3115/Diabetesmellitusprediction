@@ -67,6 +67,7 @@
         <h2><i class="fa-solid fa-clipboard-list"></i> Prediction Result</h2>
         <div id="prediction">Prediction:</div>
         <div id="advice">Advice:</div>
+        <button type="submit"  onclick="goToDashboard()" style="width: 100px; position: relative;">Dashboard</button>
       </div>
     </section>
   </div>
@@ -78,5 +79,6 @@
 
   <!-- SCRIPTS -->
   <script src="{{ url_for('static', filename='premium.js') }}"></script>
+  <script> function goToDashboard() { window.location.href = "{{ url_for('dashboard') }}"; }</script>
 </body>
 </html>

@@ -87,97 +87,96 @@ function displayHistory() {
   }
 }
 
-// ==============================
-// DASHBOARD LOGIC
-// ==============================
-document.addEventListener("DOMContentLoaded", function () {
+ // ======== DASHBOARD LOGIC (dashboard.html) ========
   const riskStatus = document.getElementById("risk-status");
   const riskAdvice = document.getElementById("risk-advice");
   const progressBar = document.getElementById("progress");
-  const historyDiv = document.getElementById("last-prediction");
+  const historyDiv = document.getElementById("prediction-history");
+  const recommendationsDiv = document.getElementById("recommendations");
 
-  if (!riskStatus) return; // Skip if not on dashboard.html
+  if (riskStatus && historyDiv) { // Only run on dashboard.html
+    const history = JSON.parse(localStorage.getItem("predictionHistory")) || [];
+    const latest = localStorage.getItem("latestPrediction") || null;
+    const advice = localStorage.getItem("latestAdvice") || "Maintain a balanced diet and exercise.";
 
-  const latest = localStorage.getItem("latestPrediction");
-  const advice = localStorage.getItem("latestAdvice");
+    // Health Summary
+    if (latest) {
+      const isDiabetic = latest.includes("Diabetic");
+      const color = isDiabetic ? "red" : "green";
+      const width = isDiabetic ? "85%" : "35%";
+      riskStatus.innerHTML = `<strong>Status:</strong> <span style="color:${color}">${latest}</span>`;
+      progressBar.style.width = width;
+      progressBar.style.backgroundColor = color;
+      riskAdvice.innerHTML = `<strong>Advice:</strong> ${advice}`;
+    } else {
+      riskStatus.textContent = "No prediction data found.";
+      progressBar.style.width = "0";
+      riskAdvice.textContent = "";
+    }
 
-  if (latest) {
-    const isDiabetic = latest.toLowerCase().includes("diabetic");
-    const color = isDiabetic ? "red" : "green";
-    const width = isDiabetic ? "85%" : "35%";
+    // Prediction History
+    if (history.length === 0) {
+      historyDiv.textContent = "No previous predictions available.";
+    } else {
+      historyDiv.innerHTML = history
+        .map(h => `<p>${h.date}: <strong>${h.status}</strong></p>`)
+        .join("");
+    }
 
-    riskStatus.innerHTML = `<strong>Status:</strong> <span style="color:${color};">${latest}</span>`;
-    progressBar.style.width = width;
-    progressBar.style.backgroundColor = color;
-    riskAdvice.innerHTML = `<strong>Advice:</strong> ${advice || "Maintain a healthy lifestyle."}`;
-  } else {
-    riskStatus.textContent = "No prediction data found. Please make a prediction first.";
-    progressBar.style.width = "0";
-    riskAdvice.textContent = "";
+    // Charts
+    const ctxPie = document.getElementById("riskPieChart")?.getContext("2d");
+    const ctxGlucose = document.getElementById("glucoseChart")?.getContext("2d");
+    const ctxAdherence = document.getElementById("adherenceChart")?.getContext("2d");
+
+    // Pie chart: Diabetic vs Non-Diabetic
+    if (ctxPie) {
+      const diabeticCount = history.filter(h => h.status.includes("Diabetic")).length;
+      const nonDiabeticCount = history.filter(h => h.status.includes("Non-Diabetic")).length;
+      new Chart(ctxPie, {
+        type: "pie",
+        data: {
+          labels: ["Diabetic", "Non-Diabetic"],
+          datasets: [{ data: [diabeticCount, nonDiabeticCount], backgroundColor: ["#ff4d4d", "#4CAF50"] }]
+        },
+        options: { plugins: { title: { display: true, text: "Prediction Distribution" } } }
+      });
+    }
+
+    // Line chart: Glucose trend
+    if (ctxGlucose) {
+      const dates = history.map(h => h.date).reverse();
+      const glucoseValues = history.map(h => h.glucose || 100).reverse();
+      new Chart(ctxGlucose, {
+        type: "line",
+        data: { labels: dates, datasets: [{ label: "Glucose Trend", data: glucoseValues, borderColor: "#36A2EB", fill: true, backgroundColor: "rgba(54,162,235,0.3)" }] }
+      });
+    }
+
+    // Bar chart: Diet & Exercise adherence
+    if (ctxAdherence) {
+      const dietAdherence = history.map(h => h.dietAdherence || 0).reverse();
+      const exerciseAdherence = history.map(h => h.exerciseAdherence || 0).reverse();
+      new Chart(ctxAdherence, {
+        type: "bar",
+        data: {
+          labels: history.map(h => h.date).reverse(),
+          datasets: [
+            { label: "Diet %", data: dietAdherence, backgroundColor: "#4CAF50" },
+            { label: "Exercise %", data: exerciseAdherence, backgroundColor: "#FF9800" }
+          ]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+      });
+    }
+
+    // Recommendations based on latest risk
+    if (history.length > 0) {
+      const lastRisk = history[0].status.includes("Diabetic") ? "high" : "low";
+      recommendationsDiv.innerHTML = lastRisk === "high"
+        ? "<ul><li>Increase physical activity.</li><li>Follow strict diet plan.</li><li>Consult doctor for next check-up.</li></ul>"
+        : "<ul><li>Maintain current diet and exercise routine.</li><li>Regular monitoring recommended.</li></ul>";
+    } else {
+      recommendationsDiv.textContent = "No recommendations available yet. Make your first prediction!";
+    }
   }
 
-  // Show prediction history
-  displayHistory();
-
-  // Load health plan dynamically
-  loadHealthPlan();
-});
-
-// ==============================
-// HEALTH PLAN LOADER
-// ==============================
-function loadHealthPlan() {
-  const dietList = document.getElementById("diet-list");
-  const exerciseList = document.getElementById("exercise-list");
-  if (!dietList || !exerciseList) return;
-
-  const age = parseInt(localStorage.getItem("userAge") || "30");
-  const gender = (localStorage.getItem("userGender") || "female").toLowerCase();
-  const prediction = (localStorage.getItem("latestPrediction") || "non-diabetic").toLowerCase();
-
-  // Load Diet CSV
-  Papa.parse("/data/combined_diabetes_datasets.csv", {
-    download: true,
-    header: true,
-    complete: function (results) {
-      const match = results.data.find(r =>
-        (r.condition || "").trim().toLowerCase() === prediction &&
-        (r.sex || "").trim().toLowerCase() === gender
-      );
-
-      dietList.innerHTML = "";
-      if (match && match.diet_plan) {
-        match.diet_plan.split("|").forEach(item => {
-          const li = document.createElement("li");
-          li.innerHTML = `<i class="fas fa-apple-alt"></i> ${item.trim()}`;
-          dietList.appendChild(li);
-        });
-      } else {
-        dietList.innerHTML = "<li>No diet plan found.</li>";
-      }
-    }
-  });
-
-  // Load Exercise CSV
-  Papa.parse("/data/exercise_dataset.csv", {
-    download: true,
-    header: true,
-    complete: function (results) {
-      const match = results.data.find(r =>
-        (r.condition || "").trim().toLowerCase() === prediction &&
-        (r.sex || "").trim().toLowerCase() === gender
-      );
-
-      exerciseList.innerHTML = "";
-      if (match && match.exercise_plan) {
-        match.exercise_plan.split(";").forEach(item => {
-          const li = document.createElement("li");
-          li.innerHTML = `<i class="fas fa-dumbbell"></i> ${item.trim()}`;
-          exerciseList.appendChild(li);
-        });
-      } else {
-        exerciseList.innerHTML = "<li>No exercise plan found.</li>";
-      }
-    }
-  });
-}
