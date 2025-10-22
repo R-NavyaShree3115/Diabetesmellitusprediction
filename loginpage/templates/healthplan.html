@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium Diabetes Management - Health Plan</title>
-  <link rel="stylesheet" href="static/premium.css">
+  <title>Patient Health Plan</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='premium.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -13,13 +13,13 @@
     <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
     <nav>
       <ul>
-        <li><a href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="http://127.0.0.1:5000/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
-        <li><a href="http://127.0.0.1:5000/healthplan" class="active"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
-        <li><a href="http://127.0.0.1:5000/progress"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
-        <li><a href="http://127.0.0.1:5000/alerts"><i class="fa-solid fa-bell"></i> Alerts</a></li>
-        <li><a href="http://127.0.0.1:5000/doctorconnect"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
-        <li><a href="http://127.0.0.1:5000/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/healthplan" class="active">Health Plan</a></li>
+        <li><a href="/progress">Progress</a></li>
+        <li><a href="/alerts">Alerts</a></li>
+        <li><a href="/doctor/healthplan">Doctor Access</a></li>
+        <li><a href="/logout">Logout</a></li>
       </ul>
     </nav>
   </header>
@@ -27,8 +27,7 @@
   <!-- MAIN CONTAINER -->
   <div class="container">
     <h2>Personalized Health Plan</h2>
-    
-    <section class="card" id="health-plan">
+    <section class="card">
       <div class="plan">
         <!-- Diet Plan -->
         <div class="diet">
@@ -54,31 +53,23 @@
     <p>&copy; 2025 CareConnect | Stay Healthy, Stay Safe</p>
   </footer>
 
-  <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  
-    <script src="{{url_for('static', filename='premium.js')}}"></script>
+  <!-- SCRIPT TO FETCH DATA -->
   <script>
-   function goHome() {
-  window.location.href = "http://127.0.0.1:5000";
-}
-function logout() {
-  window.location.href = "http://127.0.0.1:5000/logout";
-}
-function godashboard() {
-  window.location.href = "http://127.0.0.1:5000/dashboard";
-}
+    document.addEventListener("DOMContentLoaded", () => {
+      const dietList = document.getElementById("diet-list");
+      const exerciseList = document.getElementById("exercise-list");
 
-function gohealthplan() {
-  window.location.href = "http://127.0.0.1:5000/healthplan";
-}
-function goprogress() {
-  window.location.href = "http://127.0.0.1:5000/progress";
-}
-function godoctorconnect() {
-  window.location.href = "http://127.0.0.1:5000/doctorconnect";
-}
+      fetch("/api/healthplan")
+        .then(res => res.json())
+        .then(data => {
+          dietList.innerHTML = data.diet.map(item => `<li>${item}</li>`).join("");
+          exerciseList.innerHTML = data.exercise.map(item => `<li>${item}</li>`).join("");
+        })
+        .catch(() => {
+          dietList.innerHTML = "<li>Unable to load diet plan.</li>";
+          exerciseList.innerHTML = "<li>Unable to load exercise plan.</li>";
+        });
+    });
   </script>
-
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, session, url_for
 import pandas as pd
 import numpy as np
 import os
@@ -10,9 +10,11 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
-
+from flask_cors import CORS  # type: ignore
+from flask_sqlalchemy import SQLAlchemy # type: ignore
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 app.config['HOME'] = os.path.dirname(os.path.abspath(__file__))
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -213,6 +215,56 @@ def predict():
 def block_predict():
     # Prevents direct GET access to /predict
     return redirect(url_for('premium'))
+
+db = SQLAlchemy(app)
+
+# ================== DATABASE MODEL ==================
+class HealthPlan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, nullable=False)
+    diet_plan = db.Column(db.Text, nullable=True)
+    exercise_plan = db.Column(db.Text, nullable=True)
+    last_updated = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+db.create_all()
+
+# ================== PATIENT HEALTH PLAN API (CSV BASED) ==================
+@app.route("/api/healthplan")
+def get_healthplan():
+    try:
+        patient_id = session.get('patient_id', 4000)
+        diabetes_df = pd.read_csv("diabetes.csv")
+
+        patient = diabetes_df[diabetes_df["id"] == patient_id]
+        if patient.empty:
+            return jsonify({"diet": ["No plan found"], "exercise": ["No plan found"], "yoga": "N/A"})
+
+        row = patient.iloc[0]
+        diet_items = [i.strip() for i in str(row["diet_plan"]).split("|")]
+        exercise_items = [i.strip() for i in str(row["exercise_plan"]).split(";")]
+        yoga = row["yoga_recommendation"]
+
+        return jsonify({"diet": diet_items, "exercise": exercise_items, "yoga": yoga})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+# ================== DOCTOR UPDATE HEALTH PLAN (DB) ==================
+@app.route("/api/update_plan", methods=["POST"])
+def update_plan():
+    data = request.json
+    patient_id = data.get("patient_id")
+    diet = "\n".join(data.get("diet", []))
+    exercise = "\n".join(data.get("exercise", []))
+
+    plan = HealthPlan.query.filter_by(patient_id=patient_id).first()
+    if plan:
+        plan.diet_plan = diet
+        plan.exercise_plan = exercise
+    else:
+        plan = HealthPlan(patient_id=patient_id, diet_plan=diet, exercise_plan=exercise)
+        db.session.add(plan)
+    db.session.commit()
+    return jsonify({"message": "Health plan updated successfully"})
 
 # -------------------------
 if __name__ == '__main__':
