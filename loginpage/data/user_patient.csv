@@ -1,0 +1,21 @@
+email,password,name,pregnancies,glucose,blood_pressure,skin_thickness,insulin,bmi,diabetes_pedigree_function,age,last_diabetes_outcome
+pat_01@test.com,2b12$HASHED_P1,John Doe,6,148,72,35,0,33.6,0.627,50,1
+pat_02@test.com,2b12$HASHED_P2,Jane Smith,1,85,66,29,0,26.6,0.351,31,0
+pat_03@test.com,2b12$HASHED_P3,Alice Brown,8,183,64,0,0,23.3,0.672,32,1
+pat_04@test.com,2b12$HASHED_P4,Bob Green,1,89,66,23,94,28.1,0.167,21,0
+pat_05@test.com,2b12$HASHED_P5,Carol White,0,137,40,35,168,43.1,2.288,33,1
+pat_06@test.com,2b12$HASHED_P6,David Black,5,116,74,0,0,25.6,0.201,30,0
+pat_07@test.com,2b12$HASHED_P7,Eva Blue,3,78,50,32,88,31.0,0.248,26,0
+pat_08@test.com,2b12$HASHED_P8,Frank Red,10,115,0,0,0,35.3,0.134,29,0
+pat_09@test.com,2b12$HASHED_P9,Grace Yellow,2,197,70,45,543,30.5,0.158,53,1
+pat_10@test.com,2b12$HASHED_P10,Henry Purple,8,125,96,0,0,0.0,0.232,54,1
+pat_11@test.com,2b12$HASHED_P11,Ivy Cyan,4,110,92,0,0,37.6,0.191,30,0
+pat_12@test.com,2b12$HASHED_P12,Jack Magenta,10,168,74,0,0,38.0,0.537,34,1
+pat_13@test.com,2b12$HASHED_P13,Kelly Gold,1,103,80,33,192,43.3,0.183,33,0
+pat_14@test.com,2b12$HASHED_P14,Liam Silver,9,171,110,24,240,45.4,0.721,54,1
+pat_15@test.com,2b12$HASHED_P15,Mia Bronze,5,139,64,35,140,28.6,0.411,26,0
+pat_16@test.com,2b12$HASHED_P16,Noah Copper,3,161,72,15,100,30.2,0.551,56,1
+pat_17@test.com,2b12$HASHED_P17,Olivia Iron,1,93,70,31,0,30.4,0.315,23,0
+pat_18@test.com,2b12$HASHED_P18,Peter Lead,1,189,60,23,846,30.1,0.398,59,1
+pat_19@test.com,2b12$HASHED_P19,Quinn Zinc,7,107,74,0,0,29.6,0.254,31,1
+pat_20@test.com,2b12$HASHED_P20,Ryan Nickel,1,126,60,0,0,30.1,0.349,47,1

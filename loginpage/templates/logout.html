@@ -4,61 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Premium Diabetes Management</title>
-  <link rel="stylesheet" href="static/premium.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='premium.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <header class="header">
-  <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
-  <nav>
-    <ul>
-      <li><a href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
-      <li><a href="http://127.0.0.1:5000/dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
-      <li><a href="http://127.0.0.1:5000/healthplan.html"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
-      <li><a href="http://127.0.0.1:5000/progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
-      <li><a href="http://127.0.0.1:5000/alerts.html"><i class="fa-solid fa-bell"></i> Alerts</a></li>
-      <li><a href="http://127.0.0.1:5000/doctorconnect.html"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
-      <li><a href="http://127.0.0.1:5000/logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
-    </ul>
-  </nav>
-</header>
-
 </head>
-<body>
-    <div class="container">
-  <h2>You have successfully logged out.</h2>
-  <div class="actions">
-    <button onclick="window.location.href='http://127.0.0.1:5000';" style="width: 150px;position: relative;">Login Again</button>
-</div>
 
-<footer>
-    <p>&copy; 2025 CareConnect | Stay Healthy, Stay Safe </p>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
+    <nav>
+      <ul>
+        <li><a href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="http://127.0.0.1:5000/dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="http://127.0.0.1:5000/healthplan.html"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
+        <li><a href="http://127.0.0.1:5000/progress.html"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
+        <li><a href="http://127.0.0.1:5000/alerts.html"><i class="fa-solid fa-bell"></i> Alerts</a></li>
+        <li><a href="http://127.0.0.1:5000/doctorconnect.html"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
+        <li><a href="http://127.0.0.1:5000/logout.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="container">
+    <h2>You have successfully logged out.</h2>
+    <div class="actions">
+      <button onclick="window.location.href='http://127.0.0.1:5000';" style="width: 150px;">Login Again</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 CareConnect | Stay Healthy, Stay Safe</p>
   </footer>
 
-  <!-- Scripts -->
+  <!-- SCRIPTS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <script src="{{url_for('static', filename='premium.js')}}"></script>
-   <script>
-   function goHome() {
-  window.location.href = "http://127.0.0.1:5000";
-}
-function logout() {
-  window.location.href = "http://127.0.0.1:5000/logout";
-}
-function godashboard() {
-  window.location.href = "http://127.0.0.1:5000/dashboard";
-}
+  <script src="{{ url_for('static', filename='premium.js') }}"></script>
 
-function gohealthplan() {
-  window.location.href = "http://127.0.0.1:5000/healthplan";
-}
-function goprogress() {
-  window.location.href = "http://127.0.0.1:5000/progress";
-}
-function godoctorconnect() {
-  window.location.href = "http://127.0.0.1:5000/doctorconnect";
-}
-
-
-</script>
+  <script>
+    function goHome() {
+      window.location.href = "http://127.0.0.1:5000";
+    }
+    function logout() {
+      window.location.href = "http://127.0.0.1:5000/logout";
+    }
+    function godashboard() {
+      window.location.href = "http://127.0.0.1:5000/dashboard";
+    }
+    function gohealthplan() {
+      window.location.href = "http://127.0.0.1:5000/healthplan";
+    }
+    function goprogress() {
+      window.location.href = "http://127.0.0.1:5000/progress";
+    }
+    function godoctorconnect() {
+      window.location.href = "http://127.0.0.1:5000/doctorconnect";
+    }
+  </script>
 </body>
 </html>

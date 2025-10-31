@@ -1,0 +1,16 @@
+Pregnancies,Glucose,BloodPressure,SkinThickness,Insulin,BMI,DiabetesPedigreeFunction,Age,Outcome,Diet_Plan_Type,Exercise_Intensity,Yoga_Routine
+6,148,72,35,0,33.6,0.627,50,1,Low-Carb,High,Vinyasa
+1,85,66,29,0,26.6,0.351,31,0,Mediterranean,Moderate,Hatha
+8,183,64,0,0,23.3,0.672,32,1,Low-Carb,High,Vinyasa
+1,89,66,23,94,28.1,0.167,21,0,Standard,Moderate,Power Yoga
+0,137,40,35,168,43.1,2.288,33,1,Keto-like,High,Ashtanga
+5,116,74,0,0,25.6,0.201,30,0,Mediterranean,Low,Yin
+3,78,50,32,88,31.0,0.248,26,1,Low-Carb,Moderate,Hatha
+10,125,70,26,115,31.1,0.205,41,1,Standard,Low,Yin
+2,197,70,45,543,30.5,0.158,53,1,Low-Carb,High,Vinyasa
+1,103,30,38,83,43.3,0.183,33,0,Mediterranean,Moderate,Power Yoga
+4,125,90,0,0,33.1,0.374,44,1,Standard,Low,Yin
+5,166,72,19,175,25.8,0.587,51,1,Keto-like,High,Ashtanga
+0,105,72,0,0,27.7,0.233,21,0,Mediterranean,Moderate,Hatha
+9,119,80,35,0,29.0,0.263,29,1,Low-Carb,High,Vinyasa
+2,110,68,22,55,27.7,0.325,41,0,Standard,Moderate,Power Yoga

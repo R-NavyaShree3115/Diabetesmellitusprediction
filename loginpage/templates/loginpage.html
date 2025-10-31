@@ -66,10 +66,10 @@
 
     .left { width: 40%; background: white; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
     .left img { width: 80%; max-width: 250px; animation: float 4s ease-in-out infinite alternate; }
-    @keyframes float { from {transform: translateY(0);} to {transform: translateY(-15px);} }
+    @keyframes float { from {transform: translateY(1);} to {transform: translateY(-15px);} }
 
     .right { flex: 1; padding: 40px; }
-
+    
     /* Sections */
     .sections { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; }
     .section {
@@ -94,6 +94,7 @@
       width: 100%; padding: 12px; background: #0096c7; color: #fff; border: none;
       border-radius: 8px; font-size: 16px; cursor: pointer; transition: 0.3s;
     }
+
     .form-box button:hover { background: #0077b6; }
     .switch-link { text-align: center; margin-top: 15px; }
     .switch-link a { color: #0096c7; font-weight: bold; cursor: pointer; }
@@ -101,9 +102,23 @@
     footer {
       text-align: center; padding: 20px 0; background: #0077b6; color: white; margin-top: 20px;
     }
+    
+    /* Custom Alert Box Styles */
+    #alertBox {
+      position: fixed; top: 100px; right: 20px; z-index: 2000; padding: 12px 25px;
+      border-radius: 8px; color: white; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      font-weight: bold; transition: opacity 0.3s ease, transform 0.3s ease;
+      opacity: 0; transform: translateX(100%);
+    }
+    #alertBox.alert-success { background-color: #28a745; }
+    #alertBox.alert-danger { background-color: #dc3545; }
+    #alertBox.show { opacity: 1; transform: translateX(0); }
+
   </style>
 </head>
 <body>
+  <!-- Custom Alert Box -->
+  <div id="alertBox" class="show">Please Wait</div>
 
   <!-- Header -->
   <header class="header">
@@ -111,195 +126,251 @@
     <nav>
       <ul>
         <li><a href="http://127.0.0.1:5000"><i class="fa-solid fa-house"></i> Home</a></li>
-
         <li><a href="http://127.0.0.1:5000/contact"><i class="fa-solid fa-envelope"></i> Contact</a></li>
-
       </ul>
     </nav>
   </header><br><br>
 
-  <!-- Container -->
   <div class="container">
-    <!-- Left -->
-    <div class="left">
-      <img src="/images/doctorwalk.gif" alt="Doctor Animation">
-      <p>Meet our expert doctors</p>
+        <div class="left">
+            <img src="/images/doctorwalk.gif" alt="Doctor Animation">
+            <p>Meet our expert doctors</p>
+        </div>
+
+        <div class="right">
+            <div class="sections">
+                <div class="section" onclick="showForm('patient')">Patient</div>
+                <div class="section" onclick="showForm('doctor')">Doctor</div>
+            </div>
+
+            <div id="patientForms" class="form-container active">
+                <div id="patientLogin" class="form-box active">
+                    <h2>Patient Login</h2>
+                    <form id="patientLoginForm" onsubmit="return loginUser(event, 'patient')">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <button type="submit">Login</button>
+                    </form>
+                    <div class="switch-link">
+                        <p>Don't have an account? <a onclick="toggleSubForm('patientSignin','patientLogin')">Sign Up</a></p>
+                    </div>
+                    <p id="patientLoginError" style="color:red; display:none; text-align: center; margin-top: 10px;"></p>
+                </div>
+
+                <div id="patientSignin" class="form-box">
+                    <h2>Patient Sign Up</h2>
+                    <form id="patientSignupForm" onsubmit="return signupUser(event, 'patient')">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="patientPassword" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="patientConfirm" required>
+                        </div>
+                        <button type="submit">Sign Up</button>
+                    </form>
+                    <p id="patientError" style="color:red; display:none; text-align: center;">Passwords do not match!</p>
+                    <div class="switch-link">
+                        <p>Already have an account? <a onclick="toggleSubForm('patientLogin','patientSignin')">Login</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="doctorForms" class="form-container">
+                <div id="doctorLogin" class="form-box active">
+                    <h2>Doctor Login</h2>
+                    <form id="doctorLoginForm" onsubmit="return loginUser(event, 'doctor')">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <button type="submit">Login</button>
+                    </form>
+                    <div class="switch-link">
+                        <p>Don't have an account? <a onclick="toggleSubForm('doctorSignin','doctorLogin')">Sign Up</a></p>
+                    </div>
+                    <p id="doctorLoginError" style="color:red; display:none; text-align: center; margin-top: 10px;"></p>
+                </div>
+
+                <div id="doctorSignin" class="form-box">
+                    <h2>Doctor Sign Up</h2>
+                    <form id="doctorSignupForm" onsubmit="return signupUser(event, 'doctor')">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="doctorPassword" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="doctorConfirm" required>
+                        </div>
+                        <button type="submit">Sign Up</button>
+                    </form>
+                    <p id="doctorError" style="color:red; display:none; text-align: center;">Passwords do not match!</p>
+                    <div class="switch-link">
+                        <p>Already have an account? <a onclick="toggleSubForm('doctorLogin','doctorSignin')">Login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Right -->
-    <div class="right">
-      <!-- Sections -->
-      <div class="sections">
-        <div class="section" onclick="showForm('patient')">Patient</div>
-        <div class="section" onclick="showForm('doctor')">Doctor</div>
-      </div>
-
-      <!-- Patient Forms -->
-      <div id="patientForms" class="form-container active">
-        <!-- Patient Login -->
-        <div id="patientLogin" class="form-box active">
-          <h2>Patient Login</h2>
-          <form onsubmit="return loginUser(event, 'patient')">
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" required>
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" required>
-            </div>
-            <button type="button" >Login</button>
-
-          </form>
-          <div class="switch-link">
-            <p>Don't have an account? <a onclick="toggleSubForm('patientSignin','patientLogin')">Sign Up</a></p>
-          </div>
-        </div>
-
-        <!-- Patient Signup -->
-        <div id="patientSignin" class="form-box">
-          <h2>Patient Sign Up</h2>
-          <form onsubmit="return signupUser(event, 'patient')">
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" required>
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" id="patientPassword" required>
-            </div>
-            <div class="form-group">
-              <label>Confirm Password</label>
-              <input type="password" id="patientConfirm" required>
-            </div>
-            <button type="submit">Sign Up</button>
-          </form>
-          <p id="patientError" style="color:red; display:none;">Passwords do not match!</p>
-          <div class="switch-link">
-            <p>Already have an account? <a onclick="toggleSubForm('patientLogin','patientSignin')">Login</a></p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Doctor Forms -->
-      <div id="doctorForms" class="form-container">
-        <!-- Doctor Login -->
-        <div id="doctorLogin" class="form-box active">
-          <h2>Doctor Login</h2>
-          <form onsubmit="return loginUser(event, 'doctor')">
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" required>
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" required>
-            </div>
-
-           
-               <button type="submit">Login</button>
-             
-          </form>
-          <div class="switch-link">
-            <p>Don't have an account? <a onclick="toggleSubForm('doctorSignin','doctorLogin')">Sign Up</a></p>
-          </div>
-        </div>
-
-        <!-- Doctor Signup -->
-        <div id="doctorSignin" class="form-box">
-          <h2>Doctor Sign Up</h2>
-          <form onsubmit="return signupUser(event, 'doctor')">
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" required>
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" id="doctorPassword" required>
-            </div>
-            <div class="form-group">
-              <label>Confirm Password</label>
-              <input type="password" id="doctorConfirm" required>
-            </div>
-            <button type="submit">Sign Up</button>
-          </form>
-          <p id="doctorError" style="color:red; display:none;">Passwords do not match!</p>
-          <div class="switch-link">
-            <p>Already have an account? <a onclick="toggleSubForm('doctorLogin','doctorSignin')">Login</a></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <footer>
     <p>&copy; 2025 CareConnect. All rights reserved | Stay Healthy</p>
   </footer>
 
 <script>
-  // client: server base URL (adjust if needed)
-  const serverUrl = "http://127.0.0.1:5000";
-  fetch(serverUrl + "/api/endpoint")
-    .then(response => response.json())
-    .then(data => console.log(data))
-    .catch(error => console.error("Error:", error));
-
-  // Switch between Patient and Doctor forms
-  function showForm(type) {
-    document.getElementById("patientForms").classList.remove("active");
-    document.getElementById("doctorForms").classList.remove("active");
-    document.getElementById(type + "Forms").classList.add("active");
-  }
-
-  // Switch between Login and Signup
-  function toggleSubForm(showId, hideId) {
-    document.getElementById(showId).classList.add("active");
-    document.getElementById(hideId).classList.remove("active");
-  }
-
-  // Signup validation
-  function signupUser(e, role) {
-    e.preventDefault();
-    const password = document.getElementById(role + "Password").value;
-    const confirm = document.getElementById(role + "Confirm").value;
-    const error = document.getElementById(role + "Error");
-
-    if (password !== confirm) {
-      error.style.display = "block";
-      return false;
-    }
-    error.style.display = "none";
-    alert("✅ " + role + " signup successful! Please login.");
-    toggleSubForm(role + "Login", role + "Signin");
-    return false;
-  }
-
-  document.querySelector('button[type="button"]').addEventListener('click', function() {
-    window.location.href = "{{ url_for('uploadpage') }}";
-  });
-  // Login redirect
-  function loginUser(e, role) {
-    e.preventDefault();
+    const serverUrl = "http://127.0.0.1:5000";
+    const alertBox = document.getElementById("alertBox");
     
-    if (role === "patient") {
-      // go to upload page for patients & show successful login alert
-      alert("✅ " + role + " login successful! Redirecting to upload page.");
-      window.location.href = "{{ url_for('uploadpage') }}";
-    } else {
-      // doctor dashboard
-      alert("✅ " + role + " login successful! Redirecting to dashboard.");
-      window.location.href = "{{ url_for('dashboard') }}";
+    /**
+     * Shows a custom notification box instead of system alert()
+     * @param {string} message - The text message to display.
+     * @param {('success'|'danger'|'warning'|'info')} type - The style class to apply.
+     */
+    function showAlert(message, type) {
+        alertBox.className = 'alert-' + type;
+        alertBox.textContent = message;
+        alertBox.classList.add('show');
+        alertBox.style.display = 'block';
+        
+        setTimeout(() => {
+            alertBox.classList.remove('show');
+            // Hide after transition ends (0.3s)
+            setTimeout(() => alertBox.style.display = 'none', 300); 
+        }, 4000);
     }
-    return false;
-  }
 
-  function logout() {
-    window.location.href = "http://127.0.0.1:5000/logout";
-  }
+    // Switch between Patient and Doctor form groups
+    function showForm(type) {
+        document.getElementById("patientForms").classList.remove("active");
+        document.getElementById("doctorForms").classList.remove("active");
+        document.getElementById(type + "Forms").classList.add("active");
+    }
 
-  function go_Home() {
-    window.location.href = "http://127.0.0.1:5000";
-  }
+    // Switch between Login and Sign Up within a form group
+    function toggleSubForm(showId, hideId) {
+        document.getElementById(showId).classList.add("active");
+        document.getElementById(hideId).classList.remove("active");
+    }
+
+    // AUTHENTICATION LOGIC START ----------------------------------------------------------------
+    
+    /**
+     * Handles the patient/doctor sign up process by communicating with the /signup API.
+     */
+    async function signupUser(e, role) {
+        e.preventDefault();
+        const form = e.target;
+        
+        // Retrieve form values
+        const email = form.querySelector('input[name="email"]').value.trim();
+        const password = form.querySelector(`#${role}Password`).value;
+        const confirm = form.querySelector(`#${role}Confirm`).value;
+        const error = document.getElementById(role + "Error");
+
+        if (password !== confirm) {
+            error.style.display = "block";
+            error.textContent = "Passwords do not match.";
+            return false;
+        }
+        error.style.display = "none";
+
+        try {
+            showAlert('Processing signup...', 'info');
+            const res = await fetch(serverUrl + '/signup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, password, type: role })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showAlert('✅ ' + data.success, 'success');
+                // Switch to the login form after successful signup
+                toggleSubForm(role + "Login", role + "Signin");
+                form.reset();
+            } else {
+                // Display error from the backend (e.g., 'Email already registered')
+                showAlert('⚠️ ' + (data.error || 'Signup failed!'), 'danger');
+            }
+        } catch (error) {
+            console.error('Signup fetch error:', error);
+            showAlert('❌ Network error. Check server status.', 'danger');
+        }
+
+        return false;
+    }
+
+    /**
+     * Handles the patient/doctor login process by communicating with the /login API.
+     */
+    async function loginUser(e, role) {
+        e.preventDefault();
+        const form = e.target;
+        
+        // Retrieve form values
+        const email = form.querySelector('input[name="email"]').value.trim();
+        // Correctly target the password input using its name
+        const password = form.querySelector('input[name="password"]').value; 
+        const error = document.getElementById(role + "LoginError");
+
+        error.style.display = "none";
+        
+        try {
+            showAlert('Logging in...', 'info');
+            const res = await fetch(serverUrl + '/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, password, type: role })
+            });
+            
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showAlert('✅ Login successful! Redirecting...', 'success');
+                // Use the redirect URL provided by the Flask backend
+                window.location.href = data.redirect || '/upload';
+            } else if (data.error) {
+                // Show specific error from backend (e.g., 'Invalid credentials')
+                error.textContent = data.error;
+                error.style.display = "block";
+                showAlert('⚠️ Login Failed: ' + data.error, 'warning');
+            } else {
+                // Catch unexpected non-successful response
+                error.textContent = 'Login failed. Please check credentials.';
+                error.style.display = "block";
+                showAlert('⚠️ An unknown error occurred during login.', 'danger');
+            }
+
+        } catch (error) {
+            console.error('Login fetch error:', error);
+            showAlert('❌ Network error. Check server status.', 'danger');
+        }
+
+        return false;
+    }
+
+    // Since the forms use onsubmit="return loginUser(event, 'role')" directly, 
+    // the previous, conflicting event listeners at the bottom are unnecessary and have been removed.
+
 </script>
 </body>
 </html>
