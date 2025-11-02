@@ -9,6 +9,71 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='premium.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+<style>
+  .user-id-box {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #e0f7f4, #f0fffb);
+  border: 1px solid #b8f2e6;
+  border-left: 5px solid #56c4f3;
+  border-radius: 12px;
+  padding: 10px 28px;
+  font-size: 14px;
+  color: #198aed;
+  box-shadow: 0 2px 6px rgba(16, 198, 248, 0.1);
+  margin-top: 12px;
+  margin-left: 100px;
+  animation: fadeInUp 0.5s ease-in-out;
+  transition: all 0.25s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-id-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 98, 128, 0.18);
+  background: linear-gradient(90deg, #e0faff, #f4ffff);
+}
+
+.user-id-box i {
+  color: #2fd2eb;
+  font-size: 17px;
+  background: rgba(13, 130, 148, 0.1);
+  padding: 6px;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.user-id-box .label {
+  font-weight: 600;
+  color: #11abb4;
+  letter-spacing: 0.3px;
+}
+
+.user-id-box .user-id {
+  background-color: #ccfbf1;
+  color: #49b4ed;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 13px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #99f6e4;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  word-break: break-all;
+}
+
+</style>
 
 <body>
   <!-- HEADER -->
@@ -26,13 +91,19 @@
       </ul>
     </nav>
   </header>
-
+<div class="user-id-box">
+  <i class="fa-solid fa-fingerprint"></i>
+  <span class="label">User ID:</span>
+  <span id="display-user-id" class="user-id" >{{ session.get('user_id') or 'N/A' }}</span>
+</div>
   <div class="container">
     <!-- STEP 1: PATIENT DATA ENTRY -->
     <section class="card" id="patient-data">
-      <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
+     <h2><i class="fa-solid fa-user"></i> Patient Data Entry</h2>
 
       <form id="patientForm">
+       
+
         <label for="Age">Age:</label>
         <input id="Age" type="number" name="Age" min="1" max="120" placeholder="Enter age (1-120)" required>
 
@@ -79,6 +150,10 @@
 
   <!-- SCRIPTS -->
   <script src="{{ url_for('static', filename='premium.js') }}"></script>
+  <script>
+    //server connect
+    server= window.href.location('http://127.0.0.1:5000')
+  </script>
   <script> function goToDashboard() { window.location.href = "{{ url_for('dashboard') }}"; }</script>
 </body>
 </html>

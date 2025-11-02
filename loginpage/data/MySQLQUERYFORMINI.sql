@@ -1,1 +1,2 @@
 SELECT * FROM diabetes_db.patient;
+

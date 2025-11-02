@@ -1,9 +1,10 @@
+import json
+import os
 from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, session, url_for
 import pandas as pd
 import numpy as np
-import os
 import joblib
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split # type: ignore
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -14,8 +15,12 @@ from sklearn.multioutput import MultiOutputClassifier
 from flask_cors import CORS # type: ignore
 from flask_sqlalchemy import SQLAlchemy # type: ignore
 from flask_bcrypt import Bcrypt # type: ignore
-from datetime import timedelta
-# Removed unused imports: FlaskForm, wtforms components, standalone bcrypt, flask_mysqldb
+from datetime import timedelta, datetime 
+from sqlalchemy.engine import Engine # type: ignore
+from sqlalchemy import event # type: ignore
+from sqlalchemy.schema import DropTable # type: ignore
+from sqlalchemy.ext.compiler import compiles # type: ignore
+from sqlalchemy import text # type: ignore
 
 # ------------------- Flask App Setup -------------------
 app = Flask(__name__)
@@ -51,8 +56,17 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:yourpassword@local
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-# This is the correct Bcrypt instance used in the signup/login routes
-bcrypt = Bcrypt(app) 
+bcrypt = Bcrypt(app)
+
+# Ensure connection pooling settings for MySQL
+@event.listens_for(Engine, "before_cursor_execute")
+def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    context._query_start_time = datetime.now()
+
+@event.listens_for(Engine, "after_cursor_execute")
+def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    total = datetime.now() - context._query_start_time
+    print(f"SQL Execution Time: {total}")
 
 # ------------------- Helper Function: Authentication Decorator -------------------
 def login_required(role=None):
@@ -73,11 +87,8 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-      
-    # Make sure all fields not sent during signup are explicitly nullable
-    name = db.Column(db.String(100), nullable=True)
     
-    # Pima features (set to nullable=True, removing conflicting DEFAULTs)
+    # Pima features (Last known summary state, matching SQL patient table)
     pregnancies = db.Column(db.Integer, nullable=True)
     glucose = db.Column(db.Integer, nullable=True)
     blood_pressure = db.Column(db.Integer, nullable=True)
@@ -88,25 +99,95 @@ class Patient(db.Model):
     age = db.Column(db.Integer, nullable=True)
     last_diabetes_outcome = db.Column(db.Integer, nullable=True)
     
-    # If you still want gender, make it nullable
-    gender = db.Column(db.String(10), nullable=True)
 class Doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-
+    
 class HealthPlan(db.Model):
-    __tablename__ = 'HealthPlan'
+    __tablename__ = 'health_plan' # lowercase table name is safer for MySQL
     id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False, unique=True)
     diet_plan = db.Column(db.Text)
     exercise_plan = db.Column(db.Text)
-    yoga_plan = db.Column(db.Text) # Added yoga_plan
+    yoga_plan = db.Column(db.Text) 
+
+# --- UPDATED MODEL: Consolidated Glucose Tracking and Prediction History ---
+class GlucoseTracking(db.Model):
+    """
+    Model to store the full PIMA feature set and prediction outcome 
+    for every submission, timestamped for tracking.
+    """
+    __tablename__ = 'glucose_tracking'
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     
+    # Pima Features (inputs)
+    pregnancies = db.Column(db.Integer, nullable=True)
+    glucose = db.Column(db.Float, nullable=True)
+    blood_pressure = db.Column(db.Float, nullable=True)
+    skin_thickness = db.Column(db.Float, nullable=True)
+    insulin = db.Column(db.Float, nullable=True)
+    bmi = db.Column(db.Float, nullable=True)
+    
+    # Map 'DiabetesPedigreeFunction' from model to 'dpf' in SQL table
+    # This aligns the model with the SQL query structure from your trace
+    dpf = db.Column('dpf', db.Float, nullable=True) 
+    
+    age = db.Column(db.Integer, nullable=True)
+    
+    # Prediction Outcome (output)
+    outcome = db.Column(db.Integer, nullable=True) 
+    
+    # Timestamp column
+    reading_timestamp = db.Column('reading_timestamp', db.DateTime, default=datetime.now)
+
+
+# --- FIX: Ensure SQLAlchemy can drop tables with foreign key constraints ---
+# This is a common pattern to handle tables that might still exist from old schema versions
+@compiles(DropTable, "mysql")
+def _compile_drop_table(element, compiler, **kwargs):
+    """
+    Adds CASCADE/IF EXISTS and foreign key check bypass for MySQL DROP TABLE commands.
+    This ensures dependent tables/old tables can be cleanly dropped in development.
+    """
+    return "SET FOREIGN_KEY_CHECKS=0; DROP TABLE IF EXISTS %s;" % compiler.process(element.element, **kwargs)
+
+@compiles(DropTable, "sqlite")
+def _compile_drop_table_sqlite(element, compiler, **kwargs):
+    """SQLite equivalent (though the error is MySQL-specific)"""
+    return "DROP TABLE IF EXISTS %s;" % compiler.process(element.element, **kwargs)
+
 
 with app.app_context():
-    db.create_all()
-    print("✅ Database tables created successfully")
+    # 🛑 FIX FOR OperationalError: Cannot drop table 'patient'
+    # We use db.metadata.drop_all(db.engine) which is generally more robust
+    # than db.drop_all() alone at handling foreign key ordering conflicts.
+    # Additionally, we manually ensure old schema tables are removed using raw SQL text.
+
+    try:
+        # Use raw SQL to explicitly drop the old table name mentioned in the error
+        # and temporarily disable FK checks for a clean drop sequence.
+        db.session.execute(text("SET FOREIGN_KEY_CHECKS=0"))
+        db.session.execute(text("DROP TABLE IF EXISTS prediction_history"))
+        db.session.commit()
+
+        # Drop all tables in dependency order (should work after the above cleanup)
+        db.metadata.drop_all(db.engine)
+        
+        # Re-enable checks and recreate all tables.
+        db.session.execute(text("SET FOREIGN_KEY_CHECKS=1"))
+        db.session.commit()
+
+        db.create_all()
+        print("✅ Database tables dropped and recreated successfully to apply schema updates.")
+
+    except Exception as e:
+        print(f"⚠️ Warning: Database cleanup encountered an error: {e}. Attempting to proceed with create_all().")
+        db.create_all()
+        db.session.execute(text("SET FOREIGN_KEY_CHECKS=1")) # Ensure checks are re-enabled
+        db.session.commit()
+        print("✅ Database schema creation completed (possibly retaining old data/tables).")
 
 
 # ------------------- Load ML Models -------------------
@@ -127,7 +208,7 @@ else:
 if os.path.exists(healthplan_model_path):
     healthplan_model = joblib.load(healthplan_model_path)
     diet_enc = joblib.load(diet_enc_path)
-    exercise_enc = joblib.load(exercise_enc_path)
+    exercise_enc = joblib.load(yoga_enc_path)
     yoga_enc = joblib.load(yoga_enc_path)
 else:
     healthplan_model = diet_enc = exercise_enc = yoga_enc = None
@@ -139,20 +220,22 @@ def home():
     """Default route → Login page (or dashboard if already logged in)"""
     if 'user_id' in session:
         if session.get('role') == 'patient':
-            return redirect(url_for('uploadpage')) # Changed from 'upload' to 'uploadpage' for clarity
+            return redirect(url_for('uploadpage')) 
         elif session.get('role') == 'doctor':
             return redirect(url_for('doctor_dashboard'))
-    return render_template('loginpage.html') # Assume this is the starting page
+    return render_template('loginpage.html') 
 
 @app.route('/images/<path:filename>')
 def serve_images(filename):
     """Serves static image files."""
-    return send_from_directory('images', filename)
+    # Assuming 'images' directory exists next to app.py
+    image_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
+    return send_from_directory(image_dir, filename)
 
 @app.route('/upload')
 @login_required(role='patient')
 def uploadpage():
-    """Route for doctors to upload datasets for model training."""
+    """Route for doctors to upload datasets for model training (redirected to here after patient login)."""
     return render_template('upload.html')
 
 @app.route('/premium')
@@ -161,17 +244,11 @@ def premium():
     """Prediction input page for patients."""
     return render_template('premium.html')
 
-@app.route('/dashboard')
-@login_required(role='patient')
-def dashboard():
-    """Patient dashboard."""
-    return render_template('dashboard.html')
 
 @app.route('/doctor_dashboard')
 @login_required(role='doctor')
 def doctor_dashboard():
     """Doctor dashboard (separate route for doctor view)."""
-    # Note: You would likely list patients here for the doctor
     return render_template('doctor_dashboard.html')
 
 @app.route('/healthplan')
@@ -202,7 +279,7 @@ def doctorconnect():
 def logout():
     """Clear session and redirect to home (login page)."""
     session.clear()
-    return redirect(url_for('home')) # Redirect to home/login page
+    return redirect(url_for('home')) 
 
 # --------------------------
 # AUTHENTICATION API ROUTES
@@ -257,7 +334,6 @@ def login():
 
     if role == 'patient':
         user = Patient.query.filter_by(email=email).first()
-        # MODIFICATION: Redirect patient to uploadpage as requested
         redirect_url = url_for('uploadpage') 
     elif role == 'doctor':
         user = Doctor.query.filter_by(email=email).first()
@@ -271,10 +347,12 @@ def login():
         session.permanent = True
         session['user_id'] = user.id
         session['role'] = role
+        session['email'] = user.email 
         return jsonify({'success': 'Login successful', 'redirect': redirect_url}), 200
+    elif user is None:
+        return jsonify({'error': 'User not found, sign in'}), 404
     else:
-        # Note: This returns JSON (401), not HTML.
-        return jsonify({'error': 'Invalid email or password'}), 401
+        return jsonify({'error': 'Incorrect password or email'}), 401
     
 # ------------------- HEALTH PLAN MODEL TRAINING FUNCTION -------------------
 def train_healthplan_model(df):
@@ -416,183 +494,131 @@ with app.app_context():
 
 # ------------------- Diabetes Prediction -------------------
 @app.route('/predict', methods=['POST'])
+@login_required(role='patient')
 def predict():
+    """
+    Handles diabetes prediction, updates the Patient's last known state, 
+    and logs the complete reading set into the GlucoseTracking history table 
+    with a timestamp.
+    """
     try:
         data = request.get_json()
+        patient_id = session.get('user_id')
+
+        # Feature preparation
         features = np.array([
             data['Pregnancies'], data['Glucose'], data['BloodPressure'],
             data['SkinThickness'], data['Insulin'], data['BMI'],
             data['DiabetesPedigreeFunction'], data['Age']
         ]).reshape(1, -1)
-        
-        # Save features to session before prediction for HealthPlan generation later
-        session['last_prediction_data'] = {
-            'Pregnancies': data['Pregnancies'], 'Glucose': data['Glucose'], 'BloodPressure': data['BloodPressure'],
-            'SkinThickness': data['SkinThickness'], 'Insulin': data['Insulin'], 'BMI': data['BMI'],
-            'DiabetesPedigreeFunction': data['DiabetesPedigreeFunction'], 'Age': data['Age'], 
-            'Outcome': None # Outcome is determined by the prediction itself
-        }
+
+        if model is None or scaler is None:
+            return jsonify({"error": "Model or scaler not initialized. Please upload data first.", "status": "failed"}), 503
 
         features_scaled = scaler.transform(features)
-        prediction = model.predict(features_scaled)[0]
-        
-        # Update session with the prediction outcome
-        session['last_prediction_data']['Outcome'] = int(prediction)
+        prediction = int(model.predict(features_scaled)[0])
 
-        advice = "High risk of diabetes detected. Consult your doctor soon." if prediction==1 else "Low risk of diabetes. Maintain healthy lifestyle."
+        advice = (
+            "⚠️ High risk of diabetes detected. Consult your doctor soon."
+            if prediction == 1
+            else "✅ Low risk of diabetes. Maintain a healthy lifestyle."
+        )
 
-        return jsonify({"prediction": int(prediction), "advice": advice})
-    except Exception as e:
-        return jsonify({"error": str(e)})
+        # ✅ Update patient record
+        patient = Patient.query.get(patient_id)
+        if patient:
+            patient.pregnancies = data['Pregnancies']
+            patient.glucose = data['Glucose']
+            patient.blood_pressure = data['BloodPressure']
+            patient.skin_thickness = data['SkinThickness']
+            patient.insulin = data['Insulin']
+            patient.bmi = data['BMI']
+            patient.diabetes_pedigree_function = data['DiabetesPedigreeFunction']
+            patient.age = data['Age']
+            patient.last_diabetes_outcome = prediction
 
-@app.route('/predict', methods=['GET'])
-def block_predict():
-    return redirect(url_for('premium'))
+            # ✅ Add new tracking record (preserves old readings)
+            new_record = GlucoseTracking(
+                patient_id=patient.id,
+                pregnancies=data['Pregnancies'],
+                glucose=data['Glucose'],
+                blood_pressure=data['BloodPressure'],
+                skin_thickness=data['SkinThickness'],
+                insulin=data['Insulin'],
+                bmi=data['BMI'],
+                # Ensure the key here matches the column name 'dpf' in the model definition
+                dpf=data['DiabetesPedigreeFunction'], 
+                age=data['Age'],
+                outcome=prediction
+            )
+            db.session.add(new_record)
 
-# ------------------- HEALTH PLAN API HELPERS -------------------
-
-def get_latest_patient_features(patient_id):
-    """
-    Fetches the last set of features submitted by the patient (uses session if available, 
-    otherwise returns a default representative sample based on patient_id parity).
-    """
-    last_prediction_data = session.get('last_prediction_data')
-    if last_prediction_data and last_prediction_data.get('Outcome') is not None:
-          return last_prediction_data
-          
-    # Fallback to representative samples if no recent prediction data in session
-    # Used for demonstration or when accessing healthplan without prior prediction
-    print(f"⚠️ Using fallback features for patient {patient_id}")
-    if patient_id % 2 == 1: # High-risk patient sample
-        return {
-            'Pregnancies': 6, 'Glucose': 148, 'BloodPressure': 72, 
-            'SkinThickness': 35, 'Insulin': 0, 'BMI': 33.6, 
-            'DiabetesPedigreeFunction': 0.627, 'Age': 50, 'Outcome': 1
-        }
-    # Low-risk patient sample
-    return {
-        'Pregnancies': 1, 'Glucose': 85, 'BloodPressure': 66, 
-        'SkinThickness': 29, 'Insulin': 0, 'BMI': 26.6, 
-        'DiabetesPedigreeFunction': 0.351, 'Age': 31, 'Outcome': 0
-    }
-
-def get_saved_plan(patient_id):
-    """Retrieves the last saved plan from the HealthPlan DB table."""
-    plan_record = HealthPlan.query.filter_by(patient_id=patient_id).first()
-    if plan_record and plan_record.diet_plan:
-        return {
-            # Plans are stored as multiline strings, split back into lists
-            "diet": plan_record.diet_plan.split('\n'),
-            "exercise": plan_record.exercise_plan.split('\n'),
-            "yoga": plan_record.yoga_plan,
-        }
-    return None
-
-def generate_ml_plan(features_dict):
-    """Uses the trained MultiOutputClassifier to predict and decode the plan."""
-    global healthplan_model, scaler, diet_enc, exercise_enc, yoga_enc
-    
-    if healthplan_model is None or scaler is None or diet_enc is None or exercise_enc is None or yoga_enc is None:
-        raise Exception("ML Health Plan models/encoders are not fully loaded. Please upload and train models first.")
-
-    feature_names = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age']
-    
-    # 1. Prepare Features (PIMA features + Outcome)
-    pima_features = [features_dict[name] for name in feature_names]
-    outcome_feature = features_dict['Outcome']
-    
-    pima_array = np.array(pima_features).reshape(1, -1)
-    
-    # Scale Pima features (first 8)
-    pima_scaled = scaler.transform(pima_array) 
-    
-    # Combine scaled PIMA features with the Outcome (the 9th feature, unscaled)
-    final_input = np.hstack([pima_scaled, np.array([outcome_feature]).reshape(-1, 1)])
-
-    # 2. Predict Plan Codes
-    plan_codes = healthplan_model.predict(final_input)[0]
-    
-    # 3. Decode Plan Codes
-    diet_plan_type = diet_enc.inverse_transform([plan_codes[0]])[0]
-    exercise_intensity = exercise_enc.inverse_transform([plan_codes[1]])[0]
-    yoga_routine = yoga_enc.inverse_transform([plan_codes[2]])[0]
-
-    # 4. Map decoded type/intensity to actionable plan points
-    # These static mappings provide the actionable text based on the ML prediction's category
-    diet_map = {
-        "Low-Carb": ["Limit starchy foods (rice, pasta, bread).", "Focus on lean protein and non-starchy vegetables.", "Track daily carbohydrate intake."],
-        "Mediterranean": ["Prioritize fish, poultry, and legumes.", "Use olive oil for cooking.", "Eat fresh fruits and vegetables daily."],
-        "Keto-like": ["Maintain a high-fat, very low-carb diet.", "Consult a doctor for regular monitoring.", "Avoid all sugars and grains."],
-        "Standard": ["Control portion sizes.", "Reduce intake of processed foods and sodas.", "Eat meals at consistent times."],
-    }
-    exercise_map = {
-        "High": ["45 mins intense cardio (running/swimming) 5x/week.", "Include 2 days of strength training.", "Monitor heart rate carefully."],
-        "Moderate": ["30 mins brisk walking/light jogging 4x/week.", "Simple bodyweight exercises 3x/week.", "Stay active throughout the day."],
-        "Low": ["20 mins light walking daily.", "Daily gentle stretching or mobility work.", "Avoid prolonged sitting."],
-    }
-    
-    # Use the predicted categories to build the final plan structure
-    return {
-        "diet": diet_map.get(diet_plan_type, ["No specific plan recommendation."]),
-        "exercise": exercise_map.get(exercise_intensity, ["No specific plan recommendation."]),
-        "yoga": f"Recommended Yoga: **{yoga_routine}** (Focus on relaxation and core strength)"
-    }
-
-# ------------------- API Route for HEALTH PLAN -------------------
-@app.route("/api/get_plan/<int:patient_id>")
-@login_required(role='patient')
-def api_get_plan(patient_id):
-    """
-    Fetches the patient's saved plan or generates a new one using the ML model, 
-    then saves the new plan.
-    """
-    # Security check: Ensure patient ID from session matches the requested ID
-    if session.get('user_id') != patient_id:
-          return jsonify({"error": "Unauthorized access to patient plan."}), 403
-          
-    current_patient_id = patient_id
-    recommend_new = request.args.get('recommend_new', 'false').lower() == 'true'
-
-    try:
-        # 1. Try to fetch the saved plan first (unless explicitly requesting a new one)
-        if not recommend_new:
-            saved_plan = get_saved_plan(current_patient_id)
-            if saved_plan:
-                return jsonify(saved_plan)
-
-        # 2. Generate new plan using ML
-        features = get_latest_patient_features(current_patient_id)
-        
-        ml_plan = generate_ml_plan(features)
-
-        # 3. Save the newly generated plan to the database
-        diet_str = "\n".join(ml_plan['diet'])
-        exercise_str = "\n".join(ml_plan['exercise'])
-        yoga_str = ml_plan['yoga']
-        
-        plan_record = HealthPlan.query.filter_by(patient_id=current_patient_id).first()
-        if plan_record:
-            # Update existing record
-            plan_record.diet_plan = diet_str
-            plan_record.exercise_plan = exercise_str
-            plan_record.yoga_plan = yoga_str
-        else:
-            # Create new record
-            plan_record = HealthPlan(patient_id=current_patient_id, diet_plan=diet_str, exercise_plan=exercise_str, yoga_plan=yoga_str)
-            db.session.add(plan_record)
-            
         db.session.commit()
-        
-        return jsonify(ml_plan)
+
+        # ✅ Also return the updated history for instant chart refresh
+        history = GlucoseTracking.query.filter_by(patient_id=patient_id).order_by(
+            GlucoseTracking.reading_timestamp.asc()).all()
+
+        history_data = [{
+            "timestamp": h.reading_timestamp.strftime('%Y-%m-%d %H:%M'),
+            "glucose": float(h.glucose or 0)
+        } for h in history]
+
+        return jsonify({
+            "prediction": prediction,
+            "advice": advice,
+            "status": "success",
+            "history": history_data
+        })
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error in api_get_plan for patient {current_patient_id}: {e}")
-        return jsonify({
-            "error": "Could not generate or fetch plan.",
-            "details": str(e)
-        }), 500
+        print(f"Prediction Error: {e}")
+        # Return a clean error message to the frontend without exposing full traceback
+        return jsonify({"error": "Failed to log prediction data. Check database schema.", "status": "failed"}), 500
+
+# ------------------- Dashboard Route -------------------
+@app.route('/dashboard')
+@login_required(role='patient')
+def dashboard():
+    patient_id = session.get('user_id')
+    patient_record = Patient.query.get(patient_id)
+
+    # 🛡️ Safety: handle invalid/expired session
+    if not patient_record:
+        session.clear()
+        return redirect(url_for('home'))
+
+    # 🧠 Build patient info to show dynamically on dashboard
+    patient_info = {
+        'id': patient_record.id,
+        'name': f"P{patient_record.id} (Age {patient_record.age or 'N/A'})"
+    }
+
+    # 📈 Fetch last 30 glucose readings (oldest → newest)
+    records = (
+        GlucoseTracking.query
+        .filter_by(patient_id=patient_id)
+        .order_by(GlucoseTracking.reading_timestamp.asc())
+        .limit(30)
+        .all()
+    )
+
+    # 🗓️ Convert DB data → ChartJS-friendly lists
+    dates = [r.reading_timestamp.strftime('%Y-%m-%d %H:%M') for r in records]
+    glucose_values = [float(r.glucose or 0) for r in records]
+
+    # 🎯 Send data to template for graph generation
+    return render_template(
+        'dashboard.html',
+        patient=patient_info,
+        dates=dates,
+        glucose_values=glucose_values
+    )
+
 
 # ------------------- Run App -------------------
 if __name__ == '__main__':
+    with app.app_context():
+        pass
     app.run(debug=True)
