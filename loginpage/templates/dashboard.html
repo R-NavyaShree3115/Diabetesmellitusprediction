@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CareConnect - Patient Dashboard</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='chart.umd.min.js') }}"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <link rel="stylesheet" href="{{ url_for('static', filename='premium.css') }}">
 </head>
 <style>
@@ -19,99 +20,10 @@
             width: 30%;
         }
     }
-
-    /* Metrics Grid */
-    .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
-    .metric-card {
-        text-align: center;
-        padding: 20px;
-        background-color: #f7f9fc;
-        border-radius: 10px;
-        border: 1px solid #e1e8ed;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
-    }
-    .metric-card i {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-    }
-    .text-green { color: #2ecc71; }
-    .text-blue { color: #3498db; }
-    .text-orange { color: #f39c12; }
-    .metric-value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: #333;
-        line-height: 1;
-    }
-    .metric-value .unit {
-        font-size: 1rem;
-        font-weight: 500;
-        color: #777;
-        margin-left: 5px;
-    }
-    .metric-trend {
-        font-size: 0.9rem;
-        margin-top: 10px;
-        padding: 5px 10px;
-        border-radius: 5px;
-    }
-    .low-risk { background-color: #e8f9e8; color: #27ae60; }
-    .moderate-risk { background-color: #fcf8e3; color: #d35400; }
-    .stable { background-color: #e9eff5; color: #5c7f9e; }
-
-    /* Reminders List */
-    .reminder-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .reminder-list li {
-        display: flex;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px dashed #eee;
-        font-size: 1.1rem;
-        color: #555;
-    }
-    .reminder-list li:last-child {
-        border-bottom: none;
-    }
-    .reminder-icon {
-        color: #e67e22;
-        margin-right: 15px;
-        font-size: 1.2rem;
-    }
-
-    /* Footer Styling */
-    footer {
-        background-color: #333;
-        color: #ddd;
-        text-align: center;
-        padding: 15px 0;
-        font-size: 0.9rem;
-        margin-top: auto; /* Push to the bottom */
-    }
-
-    /* Chart Responsiveness */
-    #glucoseChart {
-        max-height: 400px; /* Limit chart height */
-        width: 100% !important;
-        height: auto !important;
-    }
-
-    /* Media query for smaller screens */
-    @media (max-width: 768px) {
-        .header { padding: 10px 15px; }
-        .header nav ul { display: none; } /* Hide full navigation on mobile */
-        .container { padding: 15px; }
-    }
 </style>
+
 <body>
-  <!-- 🌟 Header -->
+   <!-- HEADER -->
   <header class="header">
     <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
     <nav>
@@ -119,8 +31,6 @@
         <li><a href="{{ url_for('home') }}"><i class="fa-solid fa-house"></i> Home</a></li>
         <li><a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
         <li><a href="{{ url_for('healthplan') }}"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
-        <li><a href="{{ url_for('progress') }}"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
-        <li><a href="{{ url_for('alerts') }}"><i class="fa-solid fa-bell"></i> Alerts</a></li>
         <li><a href="{{ url_for('doctorconnect') }}"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
         <li><a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
       </ul>
@@ -140,57 +50,143 @@
       </div>
     </div>
 
-    <!-- 🩸 Glucose Tracking Graph -->
-    <div class="card" id="tracking">
-      <h2 style="color:#026ab4 ;"> Glucose Tracking Chart</h2>
-      <p style="text-align:center;">Your glucose level trend over time (mg/dL)</p>
-      <canvas id="glucoseChart" ></canvas>
-      <p id="noDataMsg" style="text-align:center; color:red; display:none;">No glucose readings available yet. Make a prediction to see your chart.</p>
+ <!-- 🩺 Health Plan Preview -->
+<div class="card">
+  <h2 style="color:#0b7dda;">Your Current Health Plan</h2>
+ 
+
+  <div style="display:flex; gap:25px; flex-wrap:wrap;">
+    <div style="flex:1; min-width:250px;">
+      <h3><i class="fa-solid fa-bowl-food"></i> Diet</h3>
+      <ul>
+        {% if diet_recommendations %}
+          {% for item in diet_recommendations %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        {% else %}
+          <li>No diet recommendations available.</li>
+        {% endif %}
+      </ul>
     </div>
+<br>
+    <div style="flex:1; min-width:250px;">
+      <h3><i class="fa-solid fa-person-running"></i> Exercise</h3>
+      <ul>
+        {% if exercise_recommendations %}
+          {% for item in exercise_recommendations %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        {% else %}
+          <li>No exercise recommendations available.</li>
+        {% endif %}
+      </ul>
+    </div>
+<br>
+    <div style="flex:1; min-width:250px;">
+      <h3><i class="fa-brands fa-pagelines"></i> Yoga</h3>
+      <ul><li>
+        {% if yoga_recommendations %}
+          {{ yoga_recommendations }}</li>
+        {% else %}
+         <li>No yoga recommendations available.</li>
+        {% endif %}
+      </ul>
+    </div><br>
   </div>
-  <br>
+</div>
+
+
+
+    <!-- 🩸 Glucose Tracking Chart -->
+    <div class="card" id="tracking">
+      <h2 style="color:#026ab4;">Glucose Tracking Chart</h2>
+      <canvas id="glucoseChart"></canvas>
+      <p id="noDataMsg" style="text-align:center; color:red; display:none;">No glucose readings yet.</p>
+    </div>
+ <!-- 🩸 BP Tracking Chart -->
+    <div class="card">
+      <h2 style="color:#b40000;">Blood Pressure Tracking Chart</h2>
+      <canvas id="bpChart"></canvas>
+      <p id="noBPMsg" style="text-align:center; color:red; display:none;">No BP readings yet.</p>
+    </div>
+    
+  
+
+  <div style="display: flex;padding: left 60px;; justify-content: center; margin: 20px 0;width: 50%;">
+    <button id="downloadBtn">📄 Download Report</button>
+</div>
+
+  </div>
+
+<br><br>
+<script>
+document.getElementById('downloadBtn').addEventListener('click', function() {
+    fetch("{{ url_for('download_report') }}")
+        .then(resp => resp.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "health_report.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(err => console.error("Download failed", err));
+});
+</script>
+
 
   <footer>
     <p>&copy; 2025 CareConnect | Stay Healthy, Stay Safe</p>
   </footer>
 
-  <!-- 📊 ChartJS Script -->
-  <script>
-    // Data passed from Flask (in your app.py dashboard route)
-    const labels = JSON.parse('{{ dates | default([]) | tojson | safe }}');
-    const dataPoints = JSON.parse('{{ glucose_values | default([]) | tojson | safe }}');
+  <!-- 📊 HEALTH PLAN FETCH SCRIPT -->
+    <script>
+    // ----------- Glucose Chart --------------
+    const glucoseLabels = JSON.parse('{{ dates | default([]) | tojson | safe }}');
+    const glucoseData = JSON.parse('{{ glucose_values | default([]) | tojson | safe }}');
 
-    const ctx = document.getElementById('glucoseChart').getContext('2d');
-
-    if (!dataPoints || dataPoints.length === 0) {
-      document.getElementById('noDataMsg').style.display = 'block';
+    const gCanvas = document.getElementById('glucoseChart');
+    if (glucoseData.length && gCanvas) {
+        new Chart(gCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: glucoseLabels,
+                datasets: [{
+                    label: 'Glucose (mg/dL)',
+                    data: glucoseData,
+                    borderColor: '#0078D7',
+                    backgroundColor: 'rgba(0, 120, 215, 0.15)',
+                    borderWidth: 2
+                }]
+            }
+        });
     } else {
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Glucose Level (mg/dL)',
-            data: dataPoints,
-            borderColor: '#0078D7',
-            backgroundColor: 'rgba(0, 120, 215, 0.15)',
-            fill: true,
-            borderWidth: 2,
-            pointRadius: 4,
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: true, position: 'bottom' }
-          },
-          scales: {
-            x: { title: { display: true, text: 'Date' } },
-            y: { title: { display: true, text: 'Glucose (mg/dL)' } }
-          }
-        }
-      });
+        document.getElementById('noDataMsg').style.display = 'block';
+    }
+
+    // ----------- BP Chart -------------------
+    const bpLabels = JSON.parse('{{ bp_dates | default([]) | tojson | safe }}');
+    const bpValues = JSON.parse('{{ bp_values | default([]) | tojson | safe }}');
+
+    const bpCanvas = document.getElementById('bpChart');
+    if (bpValues.length && bpCanvas) {
+        new Chart(bpCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: bpLabels,
+                datasets: [{
+                    label: 'Blood Pressure (mmHg)',
+                    data: bpValues,
+                    borderColor: '#d9534f',
+                    backgroundColor: 'rgba(217, 83, 79, 0.15)',
+                    borderWidth: 2
+                }]
+            }
+        });
+    } else {
+        document.getElementById('noBPMsg').style.display = 'block';
     }
   </script>
 
@@ -207,10 +203,8 @@
       font-size: 16px;
       transition: background 0.2s ease;
     }
-    .quick-btn:hover {
-      background-color: #005ea0;
-    }
-    
+    .quick-btn:hover { background-color:#005ea0; }
   </style>
+<script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.js"></script>
 </body>
 </html>

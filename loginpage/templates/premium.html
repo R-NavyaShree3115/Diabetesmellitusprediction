@@ -84,8 +84,6 @@
         <li><a href="{{ url_for('home') }}"><i class="fa-solid fa-house"></i> Home</a></li>
         <li><a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
         <li><a href="{{ url_for('healthplan') }}"><i class="fa-solid fa-bowl-food"></i> Health Plan</a></li>
-        <li><a href="{{ url_for('progress') }}"><i class="fa-solid fa-chart-pie"></i> Progress</a></li>
-        <li><a href="{{ url_for('alerts') }}"><i class="fa-solid fa-bell"></i> Alerts</a></li>
         <li><a href="{{ url_for('doctorconnect') }}"><i class="fa-solid fa-user-doctor"></i> Doctor Connect</a></li>
         <li><a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
       </ul>
@@ -150,10 +148,8 @@
 
   <!-- SCRIPTS -->
   <script src="{{ url_for('static', filename='premium.js') }}"></script>
-  <script>
-    //server connect
-    server= window.href.location('http://127.0.0.1:5000')
-  </script>
+ 
+  
   <script> function goToDashboard() { window.location.href = "{{ url_for('dashboard') }}"; }</script>
 </body>
 </html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - CareConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .card {
+            margin-top: 20px;
+        }
+        table {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">CareConnect - Doctor</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-3">Patient Overview</h2>
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col">Patient ID</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Age</th>
+                            <th scope="col">Last Diabetes Outcome</th>
+                            <th scope="col">Last Glucose</th>
+                            <th scope="col">Last BP</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td>{{ patient.id }}</td>
+                            <td>{{ patient.email }}</td>
+                            <td>{{ patient.age }}</td>
+                            <td>
+                                {% if patient.last_diabetes_outcome == 1 %}
+                                    <span class="badge bg-danger">High</span>
+                                {% else %}
+                                    <span class="badge bg-success">Low</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ patient.latest_glucose or "N/A" }}</td>
+                            <td>{{ patient.latest_bp or "N/A" }}</td>
+                            <td>
+                                <a href="{{ url_for('view_patient', patient_id=patient.id) }}" class="btn btn-sm btn-info">View</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No patients found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

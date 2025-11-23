@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // Disable button while predicting
     predictBtn.disabled = true;
     predictBtn.innerText = "⏳ Predicting...";
 
@@ -35,8 +34,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const result = await response.json();
 
-      // Show result section dynamically
       resultSection.style.display = "block";
+
+      if (result.redirect) {
+        window.location.href = result.redirect;
+        return;
+      }
 
       if (result.error) {
         predictionDiv.innerHTML = `<span style="color:red;">⚠️ Error: ${result.error}</span>`;
@@ -44,11 +47,21 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         const color = result.prediction === 1 ? "red" : "green";
         const text = result.prediction === 1 ? "🩸 Diabetic" : "💚 Non-Diabetic";
-        predictionDiv.innerHTML = `<strong>Prediction:</strong> <span style="color:${color};">${text}</span>`;
-        adviceDiv.innerHTML = `<strong>Advice:</strong> ${result.advice}`;
+
+        predictionDiv.innerHTML =
+          `<strong>Prediction:</strong> <span style="color:${color};">${text}</span>`;
+
+        let advice = "";
+
+        if (result.prediction === 1) {
+          advice = "⚠️ High risk of diabetes. Consult doctor. Maintain healthy diet and exercise.";
+        } else {
+          advice = "✅ Low risk of diabetes. Maintain healthy lifestyle.";
+        }
+
+        adviceDiv.innerHTML = `<strong>Advice:</strong> ${advice}`;
       }
 
-      // Smooth scroll to result
       resultSection.scrollIntoView({ behavior: "smooth" });
     } catch (error) {
       predictionDiv.innerHTML = `<span style="color:red;">⚠️ Could not connect to server.</span>`;
@@ -58,4 +71,3 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
-
