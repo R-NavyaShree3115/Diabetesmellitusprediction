@@ -31,22 +31,6 @@ import pandas as pd
 import numpy as np
 from xgboost import XGBClassifier
 
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/index.py"
-    }
-  ]
-}
-
 
 # Optional PDF generator
 try:
