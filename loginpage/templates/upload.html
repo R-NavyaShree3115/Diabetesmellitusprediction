@@ -77,7 +77,7 @@
 
 <script>
   //server endpoint
-  const serverUrl = "http://127.0.0.1:5000/upload";
+  const serverUrl = "https://diabetesmellitusprediction-3.onrender.com/upload";
 const form = document.getElementById('uploadForm');
 const loading = document.getElementById('loading');
 const messages = document.getElementById('messages');
@@ -103,7 +103,7 @@ form.addEventListener('submit', async (e) => {
 
     try {
         // Upload CSV and train models
-        const res = await fetch('http://127.0.0.1:5000/upload_csv', {
+        const res = await fetch('https://diabetesmellitusprediction-3.onrender.com/upload_csv', {
             method: 'POST',
             body: formData
         });
@@ -143,10 +143,10 @@ form.addEventListener('submit', async (e) => {
 }
 // Home and Logout functions when clicked on buttons in navbar
 function goHome() {
-  window.location.href = "http://127.0.0.1:5000";
+  window.location.href = "https://diabetesmellitusprediction-3.onrender.com";
 }
 function logout() {
-  window.location.href = "http://127.0.0.1:5000/logout";
+  window.location.href = "https://diabetesmellitusprediction-3.onrender.com/logout";
 }
 </script>
 </body>
