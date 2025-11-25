@@ -30,6 +30,11 @@ from typing import Dict, Any
 import pandas as pd
 import numpy as np
 from xgboost import XGBClassifier
+import os
+from sqlalchemy import create_engine
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+engine = create_engine(DATABASE_URL)
 
 
 # Optional PDF generator
