@@ -33,8 +33,7 @@ from xgboost import XGBClassifier
 import os
 from sqlalchemy import create_engine
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-engine = create_engine(DATABASE_URL)
+
 
 
 # Optional PDF generator
@@ -72,8 +71,21 @@ os.makedirs(MODEL_FOLDER, exist_ok=True)
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
 # ------------------- Extensions / DB -------------------
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:yourpassword@localhost/diabetes_db"
+# ------------------- Extensions / DB -------------------
+raw_url = os.getenv("DATABASE_URL")
+
+if not raw_url:
+    raise ValueError("❌ DATABASE_URL is not set in environment!")
+
+# Convert mysql:// → mysql+pymysql://
+if raw_url.startswith("mysql://"):
+    raw_url = raw_url.replace("mysql://", "mysql+pymysql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = raw_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -204,6 +216,19 @@ def doctor_dashboard():
 def logout():
     session.clear()
     return redirect(url_for('home'))
+
+@app.route("/db-test")
+def test_db():
+    try:
+        # simple query to check connection
+        result = db.session.execute("SELECT 1").scalar()
+        if result == 1:
+            return "DB Connected Successfully!"
+        else:
+            return "DB Connection Failed!"
+    except Exception as e:
+        return f"DB Error: {str(e)}"
+
 
 # -------------------------- AUTH ROUTES --------------------------
 @app.route('/signup', methods=['POST'])
