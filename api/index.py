@@ -2,16 +2,18 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
 
+
 @app.route("/")
 def home():
-    return "Flask on Vercel Works!"
+    return "Flask on Render Works!"
 
-# Vercel handler
-def handler(request, *args, **kwargs):
-    return app(request.environ, start_response)
 
-# Required for Vercel
-from werkzeug.serving import run_simple
+@app.route("/predict", methods=["POST"])
+def predict():
+    data = request.get_json()
+    return jsonify({"received": data, "status": "ok"})
 
-def start_response(status, headers):
-    return None
+
+# Local run support
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
