@@ -87,9 +87,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-
 # ------------------- SQL Query Timing Logging -------------------
 @event.listens_for(Engine, "before_cursor_execute")
 def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
