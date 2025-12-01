@@ -126,8 +126,8 @@
     <div class="logo"><i class="fa-solid fa-heartbeat"></i> CareConnect</div>
     <nav>
       <ul>
-        <li><a href="https://diabetesmellitusprediction-3.onrender.com"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="https://diabetesmellitusprediction-3.onrender.com/contact"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+        <li><a href="{{ url_for('home') }}"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="#"><i class="fa-solid fa-envelope"></i> Contact</a></li>
       </ul>
     </nav>
   </header><br><br>
@@ -238,7 +238,7 @@
   </footer>
 
 <script>
-    const serverUrl = "https://diabetesmellitusprediction-3.onrender.com";
+    const serverUrl = "http://127.0.0.1:5000"; // Update with your server URL if needed
     const alertBox = document.getElementById("alertBox");
     
     /**

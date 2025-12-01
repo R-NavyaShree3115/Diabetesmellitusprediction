@@ -29,11 +29,7 @@ from openai import OpenAI  # type: ignore
 from typing import Dict, Any
 import pandas as pd
 import numpy as np
-from xgboost import XGBClassifier
-import os
-from sqlalchemy import create_engine
-
-
+from xgboost import XGBClassifier # type: ignore
 
 
 # Optional PDF generator
@@ -71,17 +67,7 @@ os.makedirs(MODEL_FOLDER, exist_ok=True)
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
 # ------------------- Extensions / DB -------------------
-# ------------------- Extensions / DB -------------------
-raw_url = os.getenv("DATABASE_URL")
-
-if not raw_url:
-    raise ValueError("❌ DATABASE_URL is not set in environment!")
-
-# Convert mysql:// → mysql+pymysql://
-if raw_url.startswith("mysql://"):
-    raw_url = raw_url.replace("mysql://", "mysql+pymysql://", 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = raw_url
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:yourpassword@localhost/diabetes_db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -196,7 +182,7 @@ def serve_images(filename):
 @app.route('/upload')
 @login_required(role='patient')
 def uploadpage():
-    return render_template('upload.html')
+    return render_template('uploadpage.html')
 
 @app.route('/premium')
 @login_required(role='patient')
@@ -213,19 +199,6 @@ def doctor_dashboard():
 def logout():
     session.clear()
     return redirect(url_for('home'))
-
-@app.route("/db-test")
-def test_db():
-    try:
-        # simple query to check connection
-        result = db.session.execute("SELECT 1").scalar()
-        if result == 1:
-            return "DB Connected Successfully!"
-        else:
-            return "DB Connection Failed!"
-    except Exception as e:
-        return f"DB Error: {str(e)}"
-
 
 # -------------------------- AUTH ROUTES --------------------------
 @app.route('/signup', methods=['POST'])
@@ -556,7 +529,7 @@ def dashboard():
 import os
 import pandas as pd
 import numpy as np
-from xgboost import XGBClassifier
+from xgboost import XGBClassifier # type: ignore
 
 # ------------ Load CSV Path ------------
 csv_path = os.path.join(os.path.dirname(__file__), "data", "diet.csv")
@@ -665,62 +638,49 @@ def healthplan():
             exercise_recommendations=[],
             yoga_recommendations=None
         )
-
+from flask import Flask, render_template, request, jsonify
 import os
-import requests
-from flask import jsonify, request
-
+from openai import OpenAI # type: ignore
+# ------------------- DOCTOR CHAT WITH OPENAI -------------------
 app.secret_key = "supersecret"
+# ------------------- OPENAI CLIENT -------------------
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY not set")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY is NOT set")
-
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 @app.route("/doctorconnect")
 def doctorconnect():
     return render_template("doctorconnect.html")
+
 @app.route("/doctor_chat", methods=["POST"])
 @login_required(role="patient")
 def doctor_chat():
     data = request.get_json()
-    user_msg = (data.get("message") or "").strip()
+    user_msg = data.get("message", "").strip()
+
     if not user_msg:
-        return jsonify({"reply": "Please type a message."})
-
-    payload = {
-        "model": "llama-3.1-8b-instant",  # recommended by Groq now :contentReference[oaicite:1]{index=1}
-        "messages": [
-            {"role": "system", "content": "You are a professional doctor. Respond simply and medically accurate."},
-            {"role": "user", "content": user_msg}
-        ],
-        "max_tokens": 300
-    }
-
-    headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
-    }
+        return jsonify({"reply": "Please enter a message."})
 
     try:
-        resp = requests.post(GROQ_URL, json=payload, headers=headers, timeout=15)
-        result = resp.json()
+        response = client.responses.create(
+            model="gpt-4.1",
+            input=f"You are a doctor. Patient says: {user_msg}. "
+                  "Respond concisely, medically accurate, in simple terms."
+        )
+        # Extract text correctly
+        doctor_reply = response.output[0].content[0].text
+        return jsonify({"reply": doctor_reply})
+
     except Exception as e:
-        app.logger.error(f"GROQ request error: {e}")
-        return jsonify({"reply": "⚠️ Error contacting AI service."})
+        app.logger.error(f"Doctor Chat ERROR: {e}")
+        return jsonify({
+            "reply": "⚠️ Sorry, the AI service is currently unavailable. Please try again later."
+        })
 
-    if "error" in result:
-        app.logger.error(f"GROQ API error: {result['error']}")
-        return jsonify({"reply": f"⚠️ AI service error: {result['error'].get('message')}"})
 
-    if "choices" not in result or not result["choices"]:
-        app.logger.error(f"Unexpected Groq response: {result}")
-        return jsonify({"reply": "⚠️ Unexpected response from AI service."})
 
-    doctor_reply = result["choices"][0]["message"]["content"]
-    return jsonify({"reply": doctor_reply})
-
-from fpdf import FPDF
+from fpdf import FPDF # type: ignore
 from flask import send_file
 import io
 import json
@@ -794,4 +754,4 @@ def download_report():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run( port=int(os.environ.get('PORT', 5000)), debug=True)
+    app.run( port=int(os.environ.get('PORT', 5000)), debug=True)   
